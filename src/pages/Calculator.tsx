@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { motion } from 'motion/react';
 import { Calculator as CalcIcon, RefreshCw } from 'lucide-react';
 
 const Calculator: React.FC = () => {
   const { data, updateData, calculate } = useData();
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -16,6 +18,11 @@ const Calculator: React.FC = () => {
       const numValue = value === '' ? 0 : Number(value);
       updateData({ [name]: numValue });
     }
+  };
+
+  const handleCalculateAndNavigate = () => {
+    calculate();
+    Promise.resolve().then(() => navigate('/cost-breakdown'));
   };
 
   return (
@@ -243,7 +250,7 @@ const Calculator: React.FC = () => {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-4">
           <button 
-            onClick={() => calculate()}
+            onClick={handleCalculateAndNavigate}
             className="flex-1 bg-gradient-to-r from-sky-600 to-sky-700 text-white font-bold py-3 lg:py-4 rounded-lg hover:from-sky-700 hover:to-sky-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
           >
             <CalcIcon size={20} />
