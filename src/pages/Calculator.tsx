@@ -90,6 +90,21 @@ const Calculator: React.FC = () => {
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Mantenimiento (h/semana)</label>
+              <div className="relative">
+                <input 
+                  type="number" 
+                  name="maintenanceHours" 
+                  value={data.maintenanceHours} 
+                  onChange={handleChange}
+                  className="w-full rounded-lg border-gray-300 pl-4 pr-12 focus:border-rose-500 focus:ring-rose-500"
+                />
+                <span className="absolute right-4 top-2.5 text-gray-400 text-sm font-medium">h</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Horas de mantenimiento por semana.</p>
+            </div>
+
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Espera Secado (Horas)</label>
               <div className="relative">
                 <input 
@@ -153,17 +168,22 @@ const Calculator: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Precio Tinta HP (€/L)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Velocidad Impresión (m²/h)</label>
               <div className="relative">
-                <span className="absolute left-4 top-2.5 text-gray-400 text-sm font-medium">€</span>
                 <input 
                   type="number" 
-                  name="hpInkPrice" 
-                  value={data.hpInkPrice} 
+                  name="hpPrintSpeed" 
+                  value={data.hpPrintSpeed} 
                   onChange={handleChange}
-                  className="w-full rounded-lg border-gray-300 pl-8 pr-4 focus:border-sky-500 focus:ring-sky-500"
+                  className="w-full rounded-lg border-gray-300 pl-4 pr-16 focus:border-sky-500 focus:ring-sky-500"
                 />
+                <span className="absolute right-4 top-2.5 text-gray-400 text-sm font-medium">m²/h</span>
               </div>
+            </div>
+
+            <div className="col-span-2 bg-sky-50 p-4 rounded-lg border border-sky-200">
+              <p className="text-sm text-sky-900 font-medium">📊 Coste de Tinta: <span className="font-bold">1,2 €/m²</span></p>
+              <p className="text-xs text-sky-700 mt-1">Estándar HP Latex (consumo 12,5ml/m² con tinta de 96€/L aprox.)</p>
             </div>
           </div>
         </motion.section>
