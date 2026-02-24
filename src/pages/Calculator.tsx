@@ -10,7 +10,7 @@ const Calculator: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
+
     if (name === 'currentMachineType' || name === 'hpMachineModel') {
       updateData({ [name]: value });
     } else {
@@ -35,7 +35,7 @@ const Calculator: React.FC = () => {
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Current Machine Section */}
-          <motion.section 
+          <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
@@ -44,14 +44,14 @@ const Calculator: React.FC = () => {
               <span className="w-2 h-6 bg-rose-500 rounded-full"></span>
               <h2 className="font-bold text-gray-800 text-lg">Máquina Actual</h2>
             </div>
-            
+
             <div className="p-4 lg:p-6 space-y-5">
               {/* Machine Type */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Tipo de Máquina</label>
-                <select 
-                  name="currentMachineType" 
-                  value={data.currentMachineType} 
+                <select
+                  name="currentMachineType"
+                  value={data.currentMachineType}
                   onChange={handleChange}
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 bg-white text-gray-900 font-medium transition-colors"
                 >
@@ -65,10 +65,10 @@ const Calculator: React.FC = () => {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Volumen Mensual</label>
                 <div className="relative">
-                  <input 
-                    type="number" 
-                    name="monthlyVolume" 
-                    value={data.monthlyVolume || ''} 
+                  <input
+                    type="number"
+                    name="monthlyVolume"
+                    value={data.monthlyVolume || ''}
                     onChange={handleChange}
                     min="0"
                     step="100"
@@ -84,10 +84,10 @@ const Calculator: React.FC = () => {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Precio Tinta</label>
                 <div className="relative">
                   <span className="absolute left-4 top-3 text-gray-500 font-medium text-sm pointer-events-none">€</span>
-                  <input 
-                    type="number" 
-                    name="inkPrice" 
-                    value={data.inkPrice || ''} 
+                  <input
+                    type="number"
+                    name="inkPrice"
+                    value={data.inkPrice || ''}
                     onChange={handleChange}
                     min="0"
                     step="0.1"
@@ -102,10 +102,10 @@ const Calculator: React.FC = () => {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Velocidad de Impresión</label>
                 <div className="relative">
-                  <input 
-                    type="number" 
-                    name="printSpeed" 
-                    value={data.printSpeed || ''} 
+                  <input
+                    type="number"
+                    name="printSpeed"
+                    value={data.printSpeed || ''}
                     onChange={handleChange}
                     min="0"
                     step="0.5"
@@ -120,10 +120,10 @@ const Calculator: React.FC = () => {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Mantenimiento Semanal</label>
                 <div className="relative">
-                  <input 
-                    type="number" 
-                    name="maintenanceHours" 
-                    value={data.maintenanceHours || ''} 
+                  <input
+                    type="number"
+                    name="maintenanceHours"
+                    value={data.maintenanceHours || ''}
                     onChange={handleChange}
                     min="0"
                     step="0.5"
@@ -139,10 +139,10 @@ const Calculator: React.FC = () => {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Tiempo Desgasificación</label>
                 <div className="relative">
-                  <input 
-                    type="number" 
-                    name="waitHours" 
-                    value={data.waitHours || ''} 
+                  <input
+                    type="number"
+                    name="waitHours"
+                    value={data.waitHours || ''}
                     onChange={handleChange}
                     min="0"
                     step="0.5"
@@ -157,7 +157,7 @@ const Calculator: React.FC = () => {
           </motion.section>
 
           {/* HP Machine Section */}
-          <motion.section 
+          <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -170,14 +170,14 @@ const Calculator: React.FC = () => {
               </div>
               <span className="bg-sky-200 text-sky-800 text-xs font-bold px-2 py-1 rounded-full">RECOMENDADO</span>
             </div>
-            
+
             <div className="p-4 lg:p-6 space-y-5">
               {/* HP Model */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Modelo HP</label>
-                <select 
-                  name="hpMachineModel" 
-                  value={data.hpMachineModel} 
+                <select
+                  name="hpMachineModel"
+                  value={data.hpMachineModel}
                   onChange={handleChange}
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 bg-white text-gray-900 font-medium transition-colors"
                 >
@@ -192,10 +192,10 @@ const Calculator: React.FC = () => {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Precio Solución</label>
                 <div className="relative">
                   <span className="absolute left-4 top-3 text-gray-500 font-medium text-sm pointer-events-none">€</span>
-                  <input 
-                    type="number" 
-                    name="hpMachinePrice" 
-                    value={data.hpMachinePrice || ''} 
+                  <input
+                    type="number"
+                    name="hpMachinePrice"
+                    value={data.hpMachinePrice || ''}
                     onChange={handleChange}
                     min="0"
                     step="100"
@@ -209,10 +209,10 @@ const Calculator: React.FC = () => {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Velocidad de Impresión</label>
                 <div className="relative">
-                  <input 
-                    type="number" 
-                    name="hpPrintSpeed" 
-                    value={data.hpPrintSpeed || ''} 
+                  <input
+                    type="number"
+                    name="hpPrintSpeed"
+                    value={data.hpPrintSpeed || ''}
                     onChange={handleChange}
                     min="0"
                     step="0.5"
@@ -247,17 +247,165 @@ const Calculator: React.FC = () => {
           </motion.section>
         </div>
 
+        {/* New Usage Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+        >
+          <div className="bg-gray-50 px-4 lg:px-6 py-4 border-b border-gray-200 flex items-center gap-3">
+            <span className="w-2 h-6 bg-purple-500 rounded-full"></span>
+            <h2 className="font-bold text-gray-800 text-lg">Distribución de Trabajos y Precios de Venta</h2>
+          </div>
+
+          <div className="p-4 lg:p-6 grid gap-6 md:grid-cols-2">
+            {/* Percentages */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Mezcla de Producción (%)</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Lona</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      name="lonaPercentage"
+                      value={data.lonaPercentage}
+                      onChange={(e) => {
+                        const val = Math.min(100, Math.max(0, Number(e.target.value)));
+                        updateData({ lonaPercentage: val, viniloPercentage: 100 - val });
+                      }}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-gray-900 font-medium"
+                    />
+                    <span className="absolute right-3 top-2 text-gray-400 font-bold">%</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Vinilo</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      name="viniloPercentage"
+                      value={data.viniloPercentage}
+                      onChange={(e) => {
+                        const val = Math.min(100, Math.max(0, Number(e.target.value)));
+                        updateData({ viniloPercentage: val, lonaPercentage: 100 - val });
+                      }}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-gray-900 font-medium"
+                    />
+                    <span className="absolute right-3 top-2 text-gray-400 font-bold">%</span>
+                  </div>
+                </div>
+              </div>
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden flex">
+                <div
+                  className="h-full bg-purple-500 transition-all duration-500"
+                  style={{ width: `${data.lonaPercentage}%` }}
+                ></div>
+                <div
+                  className="h-full bg-purple-300 transition-all duration-500"
+                  style={{ width: `${data.viniloPercentage}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Sell Prices */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Precios de Venta (€/m²)</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Venta Lona</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-gray-400 font-bold">€</span>
+                    <input
+                      type="number"
+                      name="lonaSellPrice"
+                      value={data.lonaSellPrice}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 pl-7 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-gray-900 font-medium"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Venta Vinilo</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-gray-400 font-bold">€</span>
+                    <input
+                      type="number"
+                      name="viniloSellPrice"
+                      value={data.viniloSellPrice}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 pl-7 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-gray-900 font-medium"
+                    />
+                  </div>
+                </div>
+              </div>
+              <p className="text-[10px] text-gray-400 italic">* Precios medios de mercado para el cálculo del ROI.</p>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* Renting Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+        >
+          <div className="bg-gray-50 px-4 lg:px-6 py-4 border-b border-gray-200 flex items-center gap-3">
+            <span className="w-2 h-6 bg-emerald-500 rounded-full"></span>
+            <h2 className="font-bold text-gray-800 text-lg">Financiación / Renting (Opcional)</h2>
+          </div>
+
+          <div className="p-4 lg:p-6 grid gap-6 md:grid-cols-2">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Plazo del Renting</label>
+              <div className="relative">
+                <select
+                  name="rentingMonths"
+                  value={data.rentingMonths}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 bg-white text-gray-900 font-medium transition-colors"
+                >
+                  <option value="12">12 Meses</option>
+                  <option value="24">24 Meses</option>
+                  <option value="36">36 Meses</option>
+                  <option value="48">48 Meses</option>
+                  <option value="60">60 Meses</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Interés Anual Estimado (%)</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  name="rentingInterest"
+                  value={data.rentingInterest}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.1"
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 text-gray-900 font-medium"
+                />
+                <span className="absolute right-4 top-3 text-gray-400 font-bold">%</span>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-1 italic">* Media habitual: 6.0% - 7.5%</p>
+            </div>
+          </div>
+        </motion.section>
+
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-4">
-          <button 
+          <button
             onClick={handleCalculateAndNavigate}
             className="flex-1 bg-gradient-to-r from-sky-600 to-sky-700 text-white font-bold py-3 lg:py-4 rounded-lg hover:from-sky-700 hover:to-sky-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
           >
             <CalcIcon size={20} />
             <span>Calcular Comparativa</span>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => window.location.reload()}
             className="px-4 lg:px-8 bg-white border-2 border-gray-300 text-gray-700 font-bold py-3 lg:py-4 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors flex items-center justify-center gap-2 shadow-sm"
           >

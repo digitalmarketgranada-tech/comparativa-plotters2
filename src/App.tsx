@@ -15,8 +15,8 @@ function App() {
       <Router>
         <Layout>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/calculator" element={<Calculator />} />
+            <Route path="/" element={<Calculator />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/workflow" element={<Workflow />} />
             <Route path="/sustainability" element={<Sustainability />} />
             <Route path="/technical" element={<Technical />} />

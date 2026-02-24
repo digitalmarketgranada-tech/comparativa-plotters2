@@ -9,7 +9,7 @@ const Workflow: React.FC = () => {
   const { data, results } = useData();
   const workflowRef = useRef<HTMLDivElement>(null);
 
-  const formatCurrency = (val: number) => 
+  const formatCurrency = (val: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
 
   const handleDownloadPdf = async () => {
@@ -22,7 +22,7 @@ const Workflow: React.FC = () => {
         logging: false,
         backgroundColor: '#ffffff',
       });
-      
+
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -33,7 +33,7 @@ const Workflow: React.FC = () => {
       const imgWidth = 210;
       const pageHeight = 297;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
+
       let heightLeft = imgHeight;
       let position = 0;
 
@@ -112,7 +112,7 @@ const Workflow: React.FC = () => {
         </div>
 
         {/* Timeline Comparison */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 relative overflow-hidden"
@@ -120,42 +120,65 @@ const Workflow: React.FC = () => {
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
               <AlertTriangle className="text-rose-500" />
-              <h3 className="text-xl font-bold text-gray-800">Flujo Convencional</h3>
+              <h3 className="text-xl font-bold text-gray-800">Flujo Convencional (Solvente)</h3>
             </div>
             <span className="text-sm font-medium text-gray-400 uppercase tracking-wider">Competencia</span>
           </div>
 
-          <div className="relative py-8">
-            {/* Timeline Bar */}
-            <div className="flex h-16 w-full rounded-lg overflow-hidden bg-gray-100">
-              <div className="w-[45%] bg-gray-400 flex items-center justify-center text-white font-medium relative group">
+          <div className="relative py-12">
+            {/* Timeline Bar with emphasized bottleneck */}
+            <div className="flex h-20 w-full rounded-lg overflow-hidden bg-gray-100 shadow-inner">
+              <div className="w-[30%] bg-gray-400 flex items-center justify-center text-white font-bold text-sm relative border-r border-white/20">
                 Impresión
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
-              {/* Wait Time */}
-              <div className="w-[10%] bg-rose-50 flex flex-col items-center justify-center border-x-2 border-rose-500 relative">
-                <div className="absolute -top-8 text-rose-500 text-xs font-bold whitespace-nowrap">Espera (Secado)</div>
-                <span className="text-rose-500 font-bold text-xs">24h+</span>
+
+              {/* HEAVY BOTTLENECK SECTION */}
+              <div className="w-[40%] bg-rose-500 flex flex-col items-center justify-center relative group overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-rose-400 animate-pulse transition-opacity"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <span className="text-white font-black text-xl tracking-tighter uppercase italic">STOP</span>
+                  <span className="text-white font-bold text-sm">24h - 48h</span>
+                </div>
+                {/* Horizontal progress indicators */}
+                <div className="absolute inset-0 flex items-center justify-around opacity-30">
+                  <Clock className="text-white animate-spin-slow" size={24} />
+                  <Clock className="text-white animate-spin-slow" size={24} />
+                </div>
               </div>
-              <div className="w-[45%] bg-gray-300 flex items-center justify-center text-gray-700 font-medium">
+
+              <div className="w-[30%] bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-sm relative border-l border-white/20">
                 Corte
               </div>
             </div>
-            
+
+            {/* Legend/Labels for the bottleneck */}
+            <div className="absolute left-[30%] right-[30%] -top-6 text-center">
+              <span className="bg-rose-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-md">
+                CUELLO DE BOTELLA: DESGASIFICACIÓN
+              </span>
+            </div>
+
             <div className="flex justify-between mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
-              <span>Inicio</span>
-              <span>Fin (26h 30m)</span>
+              <span>Inicio Día 1</span>
+              <span className="text-rose-600">Fin Día 2 o 3</span>
             </div>
           </div>
 
-          <div className="mt-6 p-4 bg-rose-50 rounded-lg border border-rose-200">
-            <p className="text-gray-700 text-sm font-medium mb-2">⚠️ Cuello de botella crítico:</p>
-            <p className="text-gray-600 text-sm">El proceso es secuencial. La impresora debe terminar, secar completamente (desgasificar) antes de cargar en el plotter de corte. Esto causa hasta 50 horas de espera total.</p>
+          <div className="mt-6 p-6 bg-rose-50 rounded-xl border-2 border-rose-200 flex items-start gap-4">
+            <div className="w-10 h-10 bg-rose-600 rounded-lg flex items-center justify-center text-white shrink-0 shadow-lg">
+              <AlertTriangle size={20} />
+            </div>
+            <div>
+              <p className="text-rose-900 font-bold mb-1 italic">Interrupción Crítica del Flujo:</p>
+              <p className="text-rose-700 text-sm leading-relaxed">
+                El proceso es puramente secuencial y dependiente. El material solvente <strong>debe reposar obligatoriamente</strong> para eliminar gases antes de poder cargarse en el plotter. Esto rompe cualquier posibilidad de entrega rápida y ocupa espacio físico innecesario en tu taller.
+              </p>
+            </div>
           </div>
         </motion.div>
 
         {/* HP Flow */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
@@ -178,7 +201,7 @@ const Workflow: React.FC = () => {
               <div className="absolute top-0 left-0 h-10 w-[45%] bg-sky-600 rounded-l-lg rounded-tr-lg flex items-center justify-center text-white font-bold shadow-sm z-20">
                 Impresión HP
               </div>
-              
+
               {/* Cutting Phase (Overlapping) */}
               <div className="absolute top-6 left-[10%] h-10 w-[45%] bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold shadow-sm z-30 border-2 border-white">
                 Corte Simultáneo
@@ -219,7 +242,7 @@ const Workflow: React.FC = () => {
           className="mt-12 pt-12 border-t border-gray-200"
         >
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Proceso Detallado Paso a Paso</h2>
-          
+
           <div className="grid md:grid-cols-2 gap-8">
             {/* Solvente Process */}
             <div className="space-y-4">
@@ -227,7 +250,7 @@ const Workflow: React.FC = () => {
                 <div className="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold">⏱</div>
                 Flujo Solvente Tradicional (26.5 - 50.5h)
               </h3>
-              
+
               <div className="space-y-3">
                 {[
                   { step: 1, time: "0 min", title: "Preparar Material", desc: "Cargar rollo/hoja en la impresora" },
@@ -259,7 +282,7 @@ const Workflow: React.FC = () => {
                 <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">⚡</div>
                 Flujo HP Latex Print & Cut (2-3h)
               </h3>
-              
+
               <div className="space-y-3">
                 {[
                   { step: 1, time: "0 min", title: "Preparar Material", desc: "Cargar rollo en HP Latex 630 Print & Cut" },
@@ -356,19 +379,19 @@ const Workflow: React.FC = () => {
 
       {/* Recommendations */}
       <div className="max-w-6xl mx-auto bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-8 border border-amber-200">
-        <h3 className="text-xl font-bold text-gray-900 mb-4">Recomendaciones</h3>
-        <ul className="space-y-2 text-gray-700">
+        <h3 className="text-xl font-bold text-gray-900 mb-4">Recomendaciones Estratégicas</h3>
+        <ul className="space-y-4 text-gray-700">
           <li className="flex items-start gap-3">
             <CheckCircle size={20} className="text-emerald-600 shrink-0 mt-0.5" />
-            <span><strong>Adoptar HP Latex 630 P&C</strong> es crítico para entregas rápidas y competitivas</span>
+            <span className="text-lg"><strong>HP Latex 630 P&C</strong> es la clave para ofrecer plazos de entrega imbatibles y ganar competitividad.</span>
           </li>
           <li className="flex items-start gap-3">
             <CheckCircle size={20} className="text-emerald-600 shrink-0 mt-0.5" />
-            <span><strong>Reducir tiempos de espera</strong> permite hacer más entregas al día y captar nuevos clientes</span>
+            <span className="text-lg">La <strong>eliminación de esperas</strong> incrementa tu capacidad productiva diaria, permitiéndote capturar nuevas oportunidades comerciales.</span>
           </li>
           <li className="flex items-start gap-3">
             <CheckCircle size={20} className="text-emerald-600 shrink-0 mt-0.5" />
-            <span><strong>Automatización total</strong> reduce errores humanos y costes operativos</span>
+            <span className="text-lg">Un <strong>flujo 100% automatizado</strong> minimiza el error humano y maximiza el retorno de tu inversión operativa.</span>
           </li>
         </ul>
       </div>

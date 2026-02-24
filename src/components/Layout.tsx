@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Calculator, 
-  Workflow, 
-  Leaf, 
-  FileText, 
+import {
+  LayoutDashboard,
+  Calculator,
+  Workflow,
+  Leaf,
+  FileText,
   Settings,
   DollarSign,
   Menu,
@@ -19,8 +19,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { path: '/', label: 'Inicio', icon: LayoutDashboard },
-    { path: '/calculator', label: 'Calculadora', icon: Calculator },
+    { path: '/', label: 'Calculadora', icon: Calculator },
     { path: '/cost-breakdown', label: 'Costes', icon: DollarSign },
     { path: '/workflow', label: 'Flujo de Trabajo', icon: Workflow },
     { path: '/technical', label: 'Detalle Técnico', icon: Settings },
@@ -49,7 +48,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="p-6 border-b border-gray-100 flex items-center gap-3">
           <img src="/assets/logo-hp.png" alt="HP" className="h-10 w-auto" />
           <div>
-            <h1 className="font-bold text-gray-900 leading-tight text-sm">ROI<br/>Comparativa</h1>
+            <h1 className="font-bold text-gray-900 leading-tight text-sm">ROI<br />Comparativa</h1>
           </div>
         </div>
 
@@ -64,8 +63,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium",
-                  isActive 
-                    ? "bg-sky-50 text-sky-700" 
+                  isActive
+                    ? "bg-sky-50 text-sky-700"
                     : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                 )}
               >

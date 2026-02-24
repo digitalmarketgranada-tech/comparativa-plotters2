@@ -1,13 +1,13 @@
 import React from 'react';
 import { useData } from '../context/DataContext';
 import { motion } from 'motion/react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   Cell,
   LineChart,
@@ -18,7 +18,7 @@ import { TrendingDown, AlertCircle } from 'lucide-react';
 const CostBreakdown: React.FC = () => {
   const { data, results } = useData();
 
-  const formatCurrency = (val: number) => 
+  const formatCurrency = (val: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }).format(val);
 
   // Calcular desglose de costos COMPETENCIA
@@ -59,7 +59,94 @@ const CostBreakdown: React.FC = () => {
         <p className="text-gray-500 text-lg">Análisis transparente de costes operativos mensuales</p>
       </header>
 
-      {/* Resumen Ahorro */}
+      {/* Nueva Comparativa de Margen Lado a Lado */}
+      <div className="grid lg:grid-cols-2 gap-8 mb-8">
+        {/* Lado Izquierdo: SITUACIÓN ACTUAL */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="bg-white rounded-2xl border border-rose-100 shadow-sm overflow-hidden"
+        >
+          <div className="bg-rose-50 px-6 py-4 border-b border-rose-100 flex items-center justify-between">
+            <h3 className="font-bold text-rose-900 text-lg uppercase tracking-tight">Tu Situación Actual</h3>
+            <span className="text-rose-600 font-mono text-xs font-bold px-2 py-1 bg-rose-100 rounded">SOLVENTE</span>
+          </div>
+          <div className="p-8 space-y-6">
+            <div className="flex justify-between items-end border-b border-gray-100 pb-4">
+              <span className="text-gray-500 font-medium">Ventas Mensuales</span>
+              <span className="text-2xl font-bold text-gray-900">{formatCurrency(results.monthlyRevenue)}</span>
+            </div>
+            <div className="flex justify-between items-end border-b border-gray-100 pb-4">
+              <div>
+                <span className="text-gray-500 font-medium">Costes Operativos</span>
+                <p className="text-[10px] text-rose-500 font-bold uppercase">Tinta + Mano de Obra + Esperas</p>
+              </div>
+              <span className="text-xl font-bold text-rose-600">-{formatCurrency(results.currentMonthlyCost)}</span>
+            </div>
+            <div className="pt-2">
+              <div className="bg-gradient-to-br from-rose-50 to-white p-6 rounded-xl border border-rose-200 shadow-inner">
+                <p className="text-rose-800 text-xs font-bold uppercase mb-1 tracking-wider">Beneficio Bruto Mensual</p>
+                <div className="flex items-baseline gap-2">
+                  <h2 className="text-4xl font-black text-rose-600">{formatCurrency(results.currentMonthlyProfit)}</h2>
+                  <span className="text-rose-400 font-bold text-sm">Limpio</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Lado Derecho: SOLUCIÓN HP LATEX */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="bg-white rounded-2xl border-2 border-sky-500 shadow-xl overflow-hidden relative"
+        >
+          <div className="bg-sky-600 px-6 py-4 border-b border-sky-700 flex items-center justify-between text-white">
+            <h3 className="font-bold text-lg uppercase tracking-tight">Solución HP Latex</h3>
+            <span className="bg-emerald-400 text-sky-900 font-black text-[10px] px-3 py-1 rounded-full shadow-sm">RECOMENDADO</span>
+          </div>
+          <div className="p-8 space-y-4">
+            <div className="flex justify-between items-end border-b border-gray-100 pb-3">
+              <span className="text-gray-500 font-medium">Ventas Mensuales</span>
+              <span className="text-2xl font-bold text-gray-900">{formatCurrency(results.monthlyRevenue)}</span>
+            </div>
+            <div className="flex justify-between items-end border-b border-gray-100 pb-3">
+              <div>
+                <span className="text-gray-500 font-medium">Nuevos Costes Operativos</span>
+                <p className="text-[10px] text-emerald-600 font-bold uppercase">Ahorro en Operario y Esperas</p>
+              </div>
+              <span className="text-xl font-bold text-emerald-600">-{formatCurrency(results.hpMonthlyCost)}</span>
+            </div>
+            <div className="flex justify-between items-end border-b border-gray-100 pb-3 bg-gray-50 -mx-8 px-8 py-3">
+              <div>
+                <span className="text-gray-600 font-bold text-sm">Cuota Renting (Pago Inversión)</span>
+                <p className="text-[10px] text-gray-400">{data.rentingMonths} meses al {data.rentingInterest}%</p>
+              </div>
+              <span className="text-xl font-bold text-amber-600">-{formatCurrency(results.monthlyRentingQuota)}</span>
+            </div>
+
+            <div className="pt-2">
+              <div className="bg-gradient-to-br from-emerald-600 to-sky-700 p-6 rounded-xl border-t border-white/20 shadow-lg text-white relative">
+                <div className="absolute top-4 right-4 bg-white/20 text-[10px] font-bold px-2 py-1 rounded">LIMPIO EN CAJA</div>
+                <p className="text-sky-100 text-xs font-bold uppercase mb-1 tracking-wider">Beneficio Neto Final</p>
+                <div className="flex items-baseline gap-2">
+                  <h2 className="text-4xl font-black">{formatCurrency(results.hpNetMonthlyProfit)}</h2>
+                  <span className="text-emerald-300 font-bold text-sm">Excedente</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Mensaje de Valor */}
+            <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-lg flex items-center gap-3">
+              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-xl leading-none">✓</div>
+              <p className="text-emerald-800 text-xs leading-tight">
+                <strong>La máquina se paga sola:</strong> El ahorro en costes operativos cubre la cuota del renting y aún deja <strong>{formatCurrency(results.hpNetMonthlyProfit - results.currentMonthlyProfit)}</strong> de beneficio extra al mes.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -70,9 +157,26 @@ const CostBreakdown: React.FC = () => {
             <TrendingDown size={24} />
           </div>
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Ahorro Mensual: {formatCurrency(monthlySavings)}</h2>
-            <p className="text-emerald-700 font-medium">Ahorro Anual: {formatCurrency(annualSavings)}</p>
-            <p className="text-gray-600 text-sm mt-2">ROI en {results.roiMonths.toFixed(1)} meses</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">ROI en solo {results.roiMonths.toFixed(1)} meses</h2>
+            <p className="text-emerald-700 font-medium italic">Amortización acelerada gracias al ahorro en costes de producción.</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              <div className="bg-white/50 p-3 rounded-lg border border-emerald-100">
+                <p className="text-xs text-gray-500 uppercase">Ahorro Mensual</p>
+                <p className="text-lg font-bold text-emerald-600">{formatCurrency(monthlySavings)}</p>
+              </div>
+              <div className="bg-white/50 p-3 rounded-lg border border-emerald-100">
+                <p className="text-xs text-gray-500 uppercase">Ahorro Anual</p>
+                <p className="text-lg font-bold text-emerald-600">{formatCurrency(annualSavings)}</p>
+              </div>
+              <div className="bg-white/50 p-3 rounded-lg border border-emerald-100">
+                <p className="text-xs text-gray-500 uppercase">Margen Extra</p>
+                <p className="text-lg font-bold text-emerald-600">{((results.monthlySavings / results.monthlyRevenue) * 100).toFixed(1)}%</p>
+              </div>
+              <div className="bg-white/50 p-3 rounded-lg border border-emerald-100">
+                <p className="text-xs text-gray-500 uppercase">Retorno Anual</p>
+                <p className="text-lg font-bold text-emerald-600">{((annualSavings / data.hpMachinePrice) * 100).toFixed(0)}%</p>
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -84,15 +188,15 @@ const CostBreakdown: React.FC = () => {
         transition={{ delay: 0.1 }}
         className="bg-white p-6 rounded-xl shadow-sm border border-gray-200"
       >
-        <h3 className="font-bold text-lg text-gray-900 mb-2">Coste por m² (Tinta)</h3>
-        <p className="text-sm text-gray-500 mb-6">Diferencia en coste de tinta por cada m² impreso</p>
+        <h3 className="font-bold text-lg text-gray-900 mb-2">Coste de Producción por m² (Tinta)</h3>
+        <p className="text-sm text-gray-500 mb-6">Comparativa de gasto directo en consumibles</p>
         <div className="h-[250px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} />
               <YAxis axisLine={false} tickLine={false} tickFormatter={(val) => `€${val.toFixed(2)}`} />
-              <Tooltip 
+              <Tooltip
                 formatter={(value: number) => `${value.toFixed(2)}€`}
                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
               />
@@ -113,8 +217,8 @@ const CostBreakdown: React.FC = () => {
           className="bg-white rounded-xl shadow-sm border border-rose-200 overflow-hidden"
         >
           <div className="bg-rose-50 px-6 py-4 border-b border-rose-200">
-            <h3 className="font-bold text-rose-900 text-lg">Solvente (Competencia)</h3>
-            <p className="text-rose-700 text-sm mt-1">Volumen: {data.monthlyVolume} m²/mes | Tinta: {data.inkPrice}€/L</p>
+            <h3 className="font-bold text-rose-900 text-lg">Tu Coste Actual (Estimado)</h3>
+            <p className="text-rose-700 text-sm mt-1">Gasto mensual oculto por ineficiencias</p>
           </div>
 
           <div className="p-6 space-y-4">
@@ -122,7 +226,7 @@ const CostBreakdown: React.FC = () => {
             <div className="bg-rose-50 rounded-lg p-4 border border-rose-100">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <p className="font-bold text-gray-900">Tinta</p>
+                  <p className="font-bold text-gray-900">Consumo de Tinta</p>
                   <p className="text-xs text-gray-500 mt-1">0.012 L/m² × {data.inkPrice}€/L</p>
                 </div>
                 <span className="font-bold text-lg text-gray-900">{formatCurrency(solventTintaCost)}</span>
@@ -134,8 +238,8 @@ const CostBreakdown: React.FC = () => {
             <div className="bg-amber-50 rounded-lg p-4 border border-amber-100">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <p className="font-bold text-gray-900">Operario</p>
-                  <p className="text-xs text-gray-500 mt-1">Impresión + Mantenimiento</p>
+                  <p className="font-bold text-gray-900">Tiempo de Mano de Obra</p>
+                  <p className="text-xs text-gray-500 mt-1">Producción + Mantenimiento</p>
                 </div>
                 <span className="font-bold text-lg text-gray-900">{formatCurrency(solventOperarioCost)}</span>
               </div>
@@ -150,19 +254,19 @@ const CostBreakdown: React.FC = () => {
             <div className="bg-orange-50 rounded-lg p-4 border border-orange-100">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <p className="font-bold text-gray-900">Coste Espera</p>
-                  <p className="text-xs text-gray-500 mt-1">Secado + Handling</p>
+                  <p className="font-bold text-gray-900">Tiempo de Inactividad (Espera)</p>
+                  <p className="text-xs text-gray-500 mt-1">Secado + Manipulación</p>
                 </div>
                 <span className="font-bold text-lg text-gray-900">{formatCurrency(solventEsperaCost)}</span>
               </div>
-              <p className="text-xs text-gray-600">({data.monthlyVolume}/50 rolls) × 0.5h × 20€/h</p>
+              <p className="text-xs text-gray-600">({data.monthlyVolume}/50 rolls) × 0.5h × 20€/h por esperas de secado</p>
             </div>
 
             {/* TOTAL */}
-            <div className="bg-gradient-to-r from-rose-100 to-rose-50 rounded-lg p-4 border-2 border-rose-300">
+            <div className="bg-rose-600 rounded-lg p-4 text-white shadow-inner">
               <div className="flex justify-between items-center">
-                <span className="font-bold text-rose-900 text-lg">TOTAL MENSUAL</span>
-                <span className="text-3xl font-bold text-rose-600">{formatCurrency(results.currentMonthlyCost)}</span>
+                <span className="font-bold text-sm uppercase">Coste Operativo Total</span>
+                <span className="text-3xl font-bold">{formatCurrency(results.currentMonthlyCost)}</span>
               </div>
             </div>
           </div>
@@ -177,10 +281,10 @@ const CostBreakdown: React.FC = () => {
         >
           <div className="bg-sky-50 px-6 py-4 border-b border-sky-200 flex justify-between items-start">
             <div>
-              <h3 className="font-bold text-sky-900 text-lg">HP Latex 630 P&C</h3>
-              <p className="text-sky-700 text-sm mt-1">Volumen: {data.monthlyVolume} m²/mes | Tinta: 1.2€/m²</p>
+              <h3 className="font-bold text-sky-900 text-lg">Tu Coste con HP Latex</h3>
+              <p className="text-sky-700 text-sm mt-1">Máxima eficiencia y ahorro directo</p>
             </div>
-            <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">RECOMENDADO</span>
+            <span className="bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">AHORRO GARANTIZADO</span>
           </div>
 
           <div className="p-6 space-y-4">
@@ -188,8 +292,8 @@ const CostBreakdown: React.FC = () => {
             <div className="bg-sky-50 rounded-lg p-4 border border-sky-100">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <p className="font-bold text-gray-900">Tinta</p>
-                  <p className="text-xs text-gray-500 mt-1">Cartucho 1L: 118€ (optimizado)</p>
+                  <p className="font-bold text-gray-900">Consumo de Tinta HP</p>
+                  <p className="text-xs text-gray-500 mt-1">Optimización por micro-gotas</p>
                 </div>
                 <span className="font-bold text-lg text-gray-900">{formatCurrency(hpTintaCost)}</span>
               </div>
@@ -200,15 +304,15 @@ const CostBreakdown: React.FC = () => {
             <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <p className="font-bold text-gray-900">Operario</p>
-                  <p className="text-xs text-gray-500 mt-1">Solo impresión</p>
+                  <p className="font-bold text-gray-900">Tiempo de Operario</p>
+                  <p className="text-xs text-gray-500 mt-1">Solo tiempo de impresión real</p>
                 </div>
                 <span className="font-bold text-lg text-gray-900">{formatCurrency(hpOperarioCost)}</span>
               </div>
               <div className="text-xs text-gray-600 space-y-1">
                 <p>Impresión: {data.monthlyVolume}m² ÷ {data.hpPrintSpeed}m²/h = {hpPrintHours.toFixed(1)}h</p>
                 <p>{hpPrintHours.toFixed(1)}h × 20€/h</p>
-                <p className="text-emerald-600 font-medium">✓ Sin mantenimiento</p>
+                <p className="text-emerald-600 font-bold uppercase text-[10px]">✓ Sin pérdida de tiempo en labores manuales</p>
               </div>
             </div>
 
@@ -216,31 +320,31 @@ const CostBreakdown: React.FC = () => {
             <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <p className="font-bold text-gray-900">Mantenimiento</p>
-                  <p className="text-xs text-gray-500 mt-1">Sistema estable</p>
+                  <p className="font-bold text-gray-900">Mantenimiento Preventivo</p>
+                  <p className="text-xs text-gray-500 mt-1">Tecnología auto-limpiable</p>
                 </div>
                 <span className="font-bold text-lg text-emerald-600">0 €</span>
               </div>
-              <p className="text-xs text-emerald-700 font-medium">✓ Sin costes de mantenimiento</p>
+              <p className="text-xs text-emerald-700 font-medium">✓ Ahorras más de {data.maintenanceHours * 4}h de limpieza mensual</p>
             </div>
 
             {/* Espera */}
             <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <p className="font-bold text-gray-900">Espera/Secado</p>
-                  <p className="text-xs text-gray-500 mt-1">Curado instantáneo</p>
+                  <p className="font-bold text-gray-900">Tiempo de Secado</p>
+                  <p className="text-xs text-gray-500 mt-1">Tecnología de curado instantáneo</p>
                 </div>
                 <span className="font-bold text-lg text-emerald-600">0 €</span>
               </div>
-              <p className="text-xs text-emerald-700 font-medium">✓ Listo para exportar/laminar inmediatamente</p>
+              <p className="text-xs text-emerald-700 font-medium">✓ Acabado seco al salir. Gana {solventEsperaCost / 20}h mensuales de producción</p>
             </div>
 
             {/* TOTAL */}
-            <div className="bg-gradient-to-r from-sky-100 to-sky-50 rounded-lg p-4 border-2 border-sky-300">
+            <div className="bg-sky-600 rounded-lg p-4 text-white shadow-inner">
               <div className="flex justify-between items-center">
-                <span className="font-bold text-sky-900 text-lg">TOTAL MENSUAL</span>
-                <span className="text-3xl font-bold text-sky-600">{formatCurrency(results.hpMonthlyCost)}</span>
+                <span className="font-bold text-sm uppercase">Coste Operativo HP</span>
+                <span className="text-3xl font-bold">{formatCurrency(results.hpMonthlyCost)}</span>
               </div>
             </div>
           </div>
@@ -264,7 +368,7 @@ const CostBreakdown: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} />
               <YAxis axisLine={false} tickLine={false} tickFormatter={(val) => `€${val}`} />
-              <Tooltip 
+              <Tooltip
                 formatter={(value: number) => formatCurrency(value)}
                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
               />
