@@ -33,8 +33,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {/* Mobile Header */}
       <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-sky-600 rounded flex items-center justify-center text-white font-bold">HP</div>
-          <span className="font-bold text-gray-800">Herramienta Comercial</span>
+          <img src="/assets/logo-hp.png" alt="HP" className="h-8 w-auto" />
+          <span className="font-bold text-gray-800">Comparativa</span>
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600">
           {isMobileMenuOpen ? <X /> : <Menu />}
@@ -47,9 +47,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="p-6 border-b border-gray-100 flex items-center gap-3">
-          <div className="w-10 h-10 bg-sky-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">HP</div>
+          <img src="/assets/logo-hp.png" alt="HP" className="h-10 w-auto" />
           <div>
-            <h1 className="font-bold text-gray-900 leading-tight">Herramienta<br/>Comercial</h1>
+            <h1 className="font-bold text-gray-900 leading-tight text-sm">ROI<br/>Comparativa</h1>
           </div>
         </div>
 
@@ -77,12 +77,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </nav>
 
         <div className="p-4 border-t border-gray-100">
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Versión Actual</p>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-gray-700">v2.5.0</span>
-              <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
-            </div>
+          <div className="bg-gradient-to-r from-sky-50 to-emerald-50 rounded-lg p-4 border border-gray-100">
+            <p className="text-xs text-gray-500 mb-2">Powered by</p>
+            <p className="text-xs font-bold text-gray-700">Digital Market</p>
+            <p className="text-xs text-gray-500 mt-2">Herramienta de Análisis ROI</p>
           </div>
         </div>
       </aside>

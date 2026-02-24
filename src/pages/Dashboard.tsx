@@ -143,6 +143,64 @@ const Dashboard: React.FC = () => {
           <ArrowRight size={20} />
         </Link>
       </div>
+
+      {/* HP Advantages Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl p-8 border border-sky-200"
+      >
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Ventajas de HP Latex Print & Cut</h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="flex gap-3">
+              <CheckCircle className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-1" />
+              <div>
+                <h4 className="font-bold text-gray-900">Secado Instantáneo</h4>
+                <p className="text-sm text-gray-600 mt-1">Tinta latex curable con calor - No requiere tiempo de espera de desgasificación</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <CheckCircle className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-1" />
+              <div>
+                <h4 className="font-bold text-gray-900">Print & Cut Simultáneo</h4>
+                <p className="text-sm text-gray-600 mt-1">Corte inmediato sin esperas - Reduce tiempo total de producción</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <CheckCircle className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-1" />
+              <div>
+                <h4 className="font-bold text-gray-900">Menor Mantenimiento</h4>
+                <p className="text-sm text-gray-600 mt-1">Sistema de tinta latex más estable - Menos limpiezas y recambios</p>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="flex gap-3">
+              <CheckCircle className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-1" />
+              <div>
+                <h4 className="font-bold text-gray-900">Mejor Sostenibilidad</h4>
+                <p className="text-sm text-gray-600 mt-1">Tinta sin solventes - Más saludable para operarios y medio ambiente</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <CheckCircle className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-1" />
+              <div>
+                <h4 className="font-bold text-gray-900">Mayor Confiabilidad</h4>
+                <p className="text-sm text-gray-600 mt-1">Tecnología HP probada en miles de instalaciones globales</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <CheckCircle className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-1" />
+              <div>
+                <h4 className="font-bold text-gray-900">Consumo Optimizado</h4>
+                <p className="text-sm text-gray-600 mt-1">Mejor cobertura y rendimiento de tinta - Reduce coste por m²</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 };
