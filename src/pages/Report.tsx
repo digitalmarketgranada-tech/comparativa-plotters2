@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useData } from '../context/DataContext';
 import { Printer, Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
@@ -6,12 +6,14 @@ import jsPDF from 'jspdf';
 
 const Report: React.FC = () => {
   const { data, results } = useData();
+  const [downloading, setDownloading] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
 
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
 
   const handleDownloadPdf = async () => {
+    setDownloading(true);
     if (!reportRef.current) return;
 
     try {
@@ -48,6 +50,15 @@ const Report: React.FC = () => {
       pdf.save('HP_Latex_Report.pdf');
     } catch (error) {
       console.error('Error generating PDF:', error);
+      // Fallback: intentar imprimir la página si falla la generación del PDF
+      try {
+        window.print();
+      } catch (e) {
+        // ignore
+      }
+    }
+    finally {
+      setDownloading(false);
     }
   };
 
@@ -58,9 +69,11 @@ const Report: React.FC = () => {
         <button 
           onClick={handleDownloadPdf}
           className="flex items-center gap-2 bg-sky-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-sky-700 transition-colors"
+          disabled={downloading}
+          aria-disabled={downloading}
         >
           <Download size={20} />
-          Descargar PDF
+          {downloading ? 'Generando...' : 'Descargar PDF'}
         </button>
       </div>
 
