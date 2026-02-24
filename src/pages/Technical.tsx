@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Hourglass, Wind, AlertTriangle, TimerOff, Leaf, Rocket, CheckCircle } from 'lucide-react';
+import { Hourglass, Wind, AlertTriangle, TimerOff, Leaf, Rocket, CheckCircle, BarChart3, Zap, Gauge } from 'lucide-react';
 
 const Technical: React.FC = () => {
   return (
