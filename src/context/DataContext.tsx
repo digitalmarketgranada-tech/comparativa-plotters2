@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 export interface CalculatorData {
   currentMachineType: string;
@@ -63,7 +63,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setData((prev) => ({ ...prev, ...newData }));
   };
 
-  const calculate = () => {
+  const calculate = useCallback(() => {
     // Basic calculation logic (simplified for demo purposes)
     // Assumptions:
     // - Ink coverage: 10ml/m2 for solvent, 12ml/m2 for latex (example)
@@ -111,11 +111,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       timeSavingsPercent,
       productionTimeSavings,
     });
-  };
+  }, [data]);
 
   useEffect(() => {
     calculate();
-  }, [data]);
+  }, [calculate]);
 
   return (
     <DataContext.Provider value={{ data, results, updateData, calculate }}>
