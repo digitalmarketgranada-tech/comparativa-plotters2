@@ -1,0 +1,5 @@
+{
+  "name": "HP Latex Sales Tool",
+  "description": "Herramienta de ventas para comparar maquinaria de impresión actual con modelos HP Latex, generando informes de ROI y eficiencia.",
+  "requestFramePermissions": []
+}
