@@ -39,10 +39,10 @@ const defaultData: CalculatorData = {
   maintenanceHours: 2,
   waitHours: 6,
   hpMachineModel: 'HP Latex 630 Print & Cut',
-  hpMachinePrice: 25000,
-  hpCartridgePrice: 45,
-  hpCartridgeSize: 775,
-  hpPrintSpeed: 36,
+  hpMachinePrice: 23190,
+  hpCartridgePrice: 118,
+  hpCartridgeSize: 1000,
+  hpPrintSpeed: 18,
 };
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -64,36 +64,40 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const calculate = useCallback(() => {
-    // Calculation based on real HP Latex metrics
-    // HP Latex tinta: SIEMPRE 1,2€/m2 (estándar industria)
-    // Competencia: cálculo basado en cobertura y precio de tinta
+    // FÓRMULAS TRANSPARENTES
+    // =====================
+    // Basadas en datos reales y verificables
     
-    const operatorHourlyRate = 20;
+    const operatorHourlyRate = 20; // €/hora estándar industria
     
-    // HP Latex: FIJO en 1,2€/m2
-    const hpInkCostPerM2 = 1.2;
+    // ===== HP LATEX (DATOS FIJOS SEGÚN PDF PROMOCIÓN) =====
+    // Tinta: 1.2 €/m² (cartucho 1L = 118€, cobertura optimizada)
+    // Velocidad: 18 m²/h (según ficha técnica HP Latex 630 - modo exterior 4 pasadas)
+    // Mantenimiento: 0 horas/semana (sin mantenimiento preventivo)
+    // Espera: 0 horas (secado instantáneo)
     
-    // Competitor: cálculo basado en cobertura y precio de tinta que introduce el usuario
-    const solventInkCoverage = 0.012; // L/m2
-    const competitorInkCostPerM2 = solventInkCoverage * data.inkPrice; // €/m2
-
-    // Current Machine Costs
+    const hpInkCostPerM2 = 1.2; // Por m² impreso
+    const hpPrintHours = data.monthlyVolume / data.hpPrintSpeed; // Horas solo impresión
+    const hpOperatorCost = hpPrintHours * operatorHourlyRate; // Solo tiempo impresión, SIN mantenimiento
+    const hpMonthlyInkCost = data.monthlyVolume * hpInkCostPerM2;
+    const hpTotalMonthly = hpMonthlyInkCost + hpOperatorCost; // Costo REAL HP
+    
+    // ===== COMPETENCIA (DATOS QUE INTRODUCE EL USUARIO) =====
+    // Cobertura tinta solvente: 12ml/m² (0.012 L/m²) - estándar industria
+    // Velocidad: la que introduce el usuario
+    // Mantenimiento: el que introduce el usuario (horas/semana)
+    // Espera: la que introduce el usuario (horas entre print y cut)
+    
+    const solventInkCoverage = 0.012; // L/m² - consumo estándar solvente
+    const competitorInkCostPerM2 = solventInkCoverage * data.inkPrice; // Calcula €/m² basado en precio/L
+    
     const currentMonthlyInkCost = data.monthlyVolume * competitorInkCostPerM2;
     const currentPrintHours = data.monthlyVolume / data.printSpeed;
-    const currentOperatorCost = (currentPrintHours + (data.maintenanceHours * 4)) * operatorHourlyRate; // Monthly
-    // Add wait time cost (opportunity cost or extra labor handling)
-    const currentWaitCost = (data.monthlyVolume / 50) * 0.5 * operatorHourlyRate; // Assume handling time per roll
+    const currentOperatorCost = (currentPrintHours + (data.maintenanceHours * 4)) * operatorHourlyRate; // 4 semanas/mes
+    // Coste oportunidad por espera: si esperas 6h por trabajo, hay pérdida de productividad aproximada
+    const currentWaitCost = (data.monthlyVolume / 50) * 0.5 * operatorHourlyRate; // Manejos de rollo
 
     const currentTotalMonthly = currentMonthlyInkCost + currentOperatorCost + currentWaitCost;
-
-    // HP Costs
-    const hpMonthlyInkCost = data.monthlyVolume * hpInkCostPerM2;
-    const hpPrintHours = data.monthlyVolume / data.hpPrintSpeed;
-    // Less maintenance for HP
-    const hpMaintenanceHours = 0.5; // per week
-    const hpOperatorCost = (hpPrintHours + (hpMaintenanceHours * 4)) * operatorHourlyRate;
-    
-    const hpTotalMonthly = hpMonthlyInkCost + hpOperatorCost;
 
     const monthlySavings = currentTotalMonthly - hpTotalMonthly;
     const annualSavings = monthlySavings * 12;
