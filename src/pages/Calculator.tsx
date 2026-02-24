@@ -8,200 +8,254 @@ const Calculator: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    updateData({ [name]: name === 'currentMachineType' || name === 'hpMachineModel' ? value : Number(value) });
+    
+    if (name === 'currentMachineType' || name === 'hpMachineModel') {
+      updateData({ [name]: value });
+    } else {
+      // Remove leading zeros for numbers and convert to number
+      const numValue = value === '' ? 0 : Number(value);
+      updateData({ [name]: numValue });
+    }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <header>
-        <h1 className="text-3xl font-bold text-gray-900">Calculadora ROI</h1>
-        <p className="text-gray-500 mt-2">Introduce los datos actuales para generar una comparativa precisa.</p>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 lg:p-8">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <header>
+          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Calculadora ROI</h1>
+          <p className="text-gray-600 mt-2">Introduce los datos actuales para generar una comparativa precisa.</p>
+        </header>
 
-      <div className="grid gap-8">
-        {/* Current Machine Section */}
-        <motion.section 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-        >
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="font-bold text-gray-800 flex items-center gap-2">
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Current Machine Section */}
+          <motion.section 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+          >
+            <div className="bg-gray-50 px-4 lg:px-6 py-4 border-b border-gray-200 flex items-center gap-3">
               <span className="w-2 h-6 bg-rose-500 rounded-full"></span>
-              Máquina Actual (Competencia)
-            </h2>
-          </div>
-          
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Máquina</label>
-              <select 
-                name="currentMachineType" 
-                value={data.currentMachineType} 
-                onChange={handleChange}
-                className="w-full rounded-lg border-gray-300 focus:border-rose-500 focus:ring-rose-500"
-              >
-                <option value="Solvente Genérica">Solvente Genérica</option>
-                <option value="Eco-Solvente">Eco-Solvente</option>
-                <option value="UV">UV</option>
-              </select>
+              <h2 className="font-bold text-gray-800 text-lg">Máquina Actual</h2>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Volumen Mensual (m²)</label>
-              <div className="relative">
-                <input 
-                  type="number" 
-                  name="monthlyVolume" 
-                  value={data.monthlyVolume} 
+            
+            <div className="p-4 lg:p-6 space-y-5">
+              {/* Machine Type */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Tipo de Máquina</label>
+                <select 
+                  name="currentMachineType" 
+                  value={data.currentMachineType} 
                   onChange={handleChange}
-                  className="w-full rounded-lg border-gray-300 pl-4 pr-12 focus:border-rose-500 focus:ring-rose-500"
-                />
-                <span className="absolute right-4 top-2.5 text-gray-400 text-sm font-medium">m²</span>
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 bg-white text-gray-900 font-medium transition-colors"
+                >
+                  <option value="Solvente Genérica">Solvente Genérica</option>
+                  <option value="Eco-Solvente">Eco-Solvente</option>
+                  <option value="UV">UV</option>
+                </select>
+              </div>
+
+              {/* Monthly Volume */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Volumen Mensual</label>
+                <div className="relative">
+                  <input 
+                    type="number" 
+                    name="monthlyVolume" 
+                    value={data.monthlyVolume || ''} 
+                    onChange={handleChange}
+                    min="0"
+                    step="100"
+                    placeholder="1500"
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 text-gray-900 font-medium placeholder-gray-400"
+                  />
+                  <span className="absolute right-4 top-3 text-gray-500 font-medium text-sm pointer-events-none">m²</span>
+                </div>
+              </div>
+
+              {/* Ink Price */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Precio Tinta</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-3 text-gray-500 font-medium text-sm pointer-events-none">€</span>
+                  <input 
+                    type="number" 
+                    name="inkPrice" 
+                    value={data.inkPrice || ''} 
+                    onChange={handleChange}
+                    min="0"
+                    step="0.1"
+                    placeholder="150"
+                    className="w-full px-4 py-2.5 pl-8 rounded-lg border border-gray-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 text-gray-900 font-medium placeholder-gray-400"
+                  />
+                  <span className="absolute right-4 top-3 text-gray-500 font-medium text-sm pointer-events-none">/L</span>
+                </div>
+              </div>
+
+              {/* Print Speed */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Velocidad de Impresión</label>
+                <div className="relative">
+                  <input 
+                    type="number" 
+                    name="printSpeed" 
+                    value={data.printSpeed || ''} 
+                    onChange={handleChange}
+                    min="0"
+                    step="0.5"
+                    placeholder="12"
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 text-gray-900 font-medium placeholder-gray-400"
+                  />
+                  <span className="absolute right-4 top-3 text-gray-500 font-medium text-sm pointer-events-none">m²/h</span>
+                </div>
+              </div>
+
+              {/* Maintenance Hours */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Mantenimiento Semanal</label>
+                <div className="relative">
+                  <input 
+                    type="number" 
+                    name="maintenanceHours" 
+                    value={data.maintenanceHours || ''} 
+                    onChange={handleChange}
+                    min="0"
+                    step="0.5"
+                    placeholder="2"
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 text-gray-900 font-medium placeholder-gray-400"
+                  />
+                  <span className="absolute right-4 top-3 text-gray-500 font-medium text-sm pointer-events-none">h</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Horas de mantenimiento por semana</p>
+              </div>
+
+              {/* Wait Hours */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Tiempo Desgasificación</label>
+                <div className="relative">
+                  <input 
+                    type="number" 
+                    name="waitHours" 
+                    value={data.waitHours || ''} 
+                    onChange={handleChange}
+                    min="0"
+                    step="0.5"
+                    placeholder="36"
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 text-gray-900 font-medium placeholder-gray-400"
+                  />
+                  <span className="absolute right-4 top-3 text-gray-500 font-medium text-sm pointer-events-none">h</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Tiempo de secado/desgasificación</p>
               </div>
             </div>
+          </motion.section>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Precio Tinta (€/L)</label>
-              <div className="relative">
-                <span className="absolute left-4 top-2.5 text-gray-400 text-sm font-medium">€</span>
-                <input 
-                  type="number" 
-                  name="inkPrice" 
-                  value={data.inkPrice} 
+          {/* HP Machine Section */}
+          <motion.section 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white rounded-xl shadow-sm border border-sky-200 overflow-hidden ring-1 ring-sky-100"
+          >
+            <div className="bg-sky-50 px-4 lg:px-6 py-4 border-b border-sky-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-6 bg-sky-500 rounded-full"></span>
+                <h2 className="font-bold text-sky-900 text-lg">HP Latex (Recomendado)</h2>
+              </div>
+              <span className="bg-sky-200 text-sky-800 text-xs font-bold px-2 py-1 rounded-full">RECOMENDADO</span>
+            </div>
+            
+            <div className="p-4 lg:p-6 space-y-5">
+              {/* HP Model */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Modelo HP</label>
+                <select 
+                  name="hpMachineModel" 
+                  value={data.hpMachineModel} 
                   onChange={handleChange}
-                  className="w-full rounded-lg border-gray-300 pl-8 pr-4 focus:border-rose-500 focus:ring-rose-500"
-                />
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 bg-white text-gray-900 font-medium transition-colors"
+                >
+                  <option value="HP Latex 630 Print & Cut">HP Latex 630 Print & Cut</option>
+                  <option value="HP Latex 700 Print & Cut">HP Latex 700 Print & Cut</option>
+                  <option value="HP Latex 800 W">HP Latex 800 W</option>
+                </select>
+              </div>
+
+              {/* HP Machine Price */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Precio Solución</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-3 text-gray-500 font-medium text-sm pointer-events-none">€</span>
+                  <input 
+                    type="number" 
+                    name="hpMachinePrice" 
+                    value={data.hpMachinePrice || ''} 
+                    onChange={handleChange}
+                    min="0"
+                    step="100"
+                    placeholder="23190"
+                    className="w-full px-4 py-2.5 pl-8 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 text-gray-900 font-medium placeholder-gray-400"
+                  />
+                </div>
+              </div>
+
+              {/* HP Print Speed */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Velocidad de Impresión</label>
+                <div className="relative">
+                  <input 
+                    type="number" 
+                    name="hpPrintSpeed" 
+                    value={data.hpPrintSpeed || ''} 
+                    onChange={handleChange}
+                    min="0"
+                    step="0.5"
+                    placeholder="18"
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 text-gray-900 font-medium placeholder-gray-400"
+                  />
+                  <span className="absolute right-4 top-3 text-gray-500 font-medium text-sm pointer-events-none">m²/h</span>
+                </div>
+              </div>
+
+              {/* Info Box */}
+              <div className="bg-sky-50 p-4 rounded-lg border border-sky-200 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">📊</span>
+                  <div>
+                    <p className="text-sm font-bold text-sky-900">Coste Tinta: <span className="text-red-600">1,2 €/m²</span></p>
+                    <p className="text-xs text-sky-700">Estándar HP (12,5ml/m²)</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fixed Values Info */}
+              <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 space-y-1">
+                <p className="text-xs font-bold text-emerald-900">✓ Ventajas Incluidas:</p>
+                <ul className="text-xs text-emerald-800 space-y-0.5">
+                  <li>• 0h mantenimiento semanal</li>
+                  <li>• 0h desgasificación (curado al instante)</li>
+                  <li>• Impresión y corte simultáneos</li>
+                </ul>
               </div>
             </div>
+          </motion.section>
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Velocidad (m²/h)</label>
-              <div className="relative">
-                <input 
-                  type="number" 
-                  name="printSpeed" 
-                  value={data.printSpeed} 
-                  onChange={handleChange}
-                  className="w-full rounded-lg border-gray-300 pl-4 pr-16 focus:border-rose-500 focus:ring-rose-500"
-                />
-                <span className="absolute right-4 top-2.5 text-gray-400 text-sm font-medium">m²/h</span>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Mantenimiento (h/semana)</label>
-              <div className="relative">
-                <input 
-                  type="number" 
-                  name="maintenanceHours" 
-                  value={data.maintenanceHours} 
-                  onChange={handleChange}
-                  className="w-full rounded-lg border-gray-300 pl-4 pr-12 focus:border-rose-500 focus:ring-rose-500"
-                />
-                <span className="absolute right-4 top-2.5 text-gray-400 text-sm font-medium">h</span>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Horas de mantenimiento por semana.</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Espera Secado (Horas)</label>
-              <div className="relative">
-                <input 
-                  type="number" 
-                  name="waitHours" 
-                  value={data.waitHours} 
-                  onChange={handleChange}
-                  className="w-full rounded-lg border-gray-300 pl-4 pr-12 focus:border-rose-500 focus:ring-rose-500"
-                />
-                <span className="absolute right-4 top-2.5 text-gray-400 text-sm font-medium">h</span>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Tiempo de desgasificación necesario.</p>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* HP Machine Section */}
-        <motion.section 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-xl shadow-sm border border-sky-200 overflow-hidden ring-1 ring-sky-100"
-        >
-          <div className="bg-sky-50 px-6 py-4 border-b border-sky-100 flex justify-between items-center">
-            <h2 className="font-bold text-sky-900 flex items-center gap-2">
-              <span className="w-2 h-6 bg-sky-500 rounded-full"></span>
-              Solución HP Latex (Recomendado)
-            </h2>
-            <span className="bg-sky-100 text-sky-700 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">
-              Recomendado
-            </span>
-          </div>
-          
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Modelo HP</label>
-              <select 
-                name="hpMachineModel" 
-                value={data.hpMachineModel} 
-                onChange={handleChange}
-                className="w-full rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500"
-              >
-                <option value="HP Latex 630 Print & Cut">HP Latex 630 Print & Cut</option>
-                <option value="HP Latex 700 Print & Cut">HP Latex 700 Print & Cut</option>
-                <option value="HP Latex 800 W">HP Latex 800 W</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Precio Solución (€)</label>
-              <div className="relative">
-                <span className="absolute left-4 top-2.5 text-gray-400 text-sm font-medium">€</span>
-                <input 
-                  type="number" 
-                  name="hpMachinePrice" 
-                  value={data.hpMachinePrice} 
-                  onChange={handleChange}
-                  className="w-full rounded-lg border-gray-300 pl-8 pr-4 focus:border-sky-500 focus:ring-sky-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Velocidad Impresión (m²/h)</label>
-              <div className="relative">
-                <input 
-                  type="number" 
-                  name="hpPrintSpeed" 
-                  value={data.hpPrintSpeed} 
-                  onChange={handleChange}
-                  className="w-full rounded-lg border-gray-300 pl-4 pr-16 focus:border-sky-500 focus:ring-sky-500"
-                />
-                <span className="absolute right-4 top-2.5 text-gray-400 text-sm font-medium">m²/h</span>
-              </div>
-            </div>
-
-            <div className="col-span-2 bg-sky-50 p-4 rounded-lg border border-sky-200">
-              <p className="text-sm text-sky-900 font-medium">📊 Coste de Tinta: <span className="font-bold">1,2 €/m²</span></p>
-              <p className="text-xs text-sky-700 mt-1">Estándar HP Latex (consumo 12,5ml/m² con tinta de 96€/L aprox.)</p>
-            </div>
-          </div>
-        </motion.section>
-
-        <div className="flex gap-4 pt-4">
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 pt-4">
           <button 
             onClick={() => calculate()}
-            className="flex-1 bg-sky-600 text-white font-bold py-4 rounded-lg hover:bg-sky-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+            className="flex-1 bg-gradient-to-r from-sky-600 to-sky-700 text-white font-bold py-3 lg:py-4 rounded-lg hover:from-sky-700 hover:to-sky-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
           >
             <CalcIcon size={20} />
-            Calcular Comparativa
+            <span>Calcular Comparativa</span>
           </button>
           
           <button 
-            className="px-6 bg-white border border-gray-200 text-gray-600 font-bold py-4 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+            onClick={() => window.location.reload()}
+            className="px-4 lg:px-8 bg-white border-2 border-gray-300 text-gray-700 font-bold py-3 lg:py-4 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors flex items-center justify-center gap-2 shadow-sm"
           >
             <RefreshCw size={20} />
-            Reset
+            <span className="hidden sm:inline">Reset</span>
           </button>
         </div>
       </div>
