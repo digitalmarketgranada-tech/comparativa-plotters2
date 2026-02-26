@@ -2,7 +2,53 @@ import React, { useRef, useState } from 'react';
 import { useData, COMPETITOR_MACHINES } from '../context/DataContext';
 import { Download, Printer, TrendingUp, Euro, Clock, Leaf, Monitor, BarChart3, CheckCircle, AlertTriangle } from 'lucide-react';
 import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
+
+const HEX_COLORS = {
+  gray: {
+    50: '#f9fafb',
+    100: '#f3f4f6',
+    200: '#e5e7eb',
+    400: '#9ca3af',
+    500: '#6b7280',
+    600: '#4b5563',
+    700: '#374151',
+    900: '#111827',
+  },
+  emerald: {
+    50: '#ecfdf5',
+    200: '#a7f3d0',
+    500: '#10b981',
+    600: '#059669',
+    700: '#047857',
+  },
+  sky: {
+    50: '#f0f9ff',
+    200: '#bae6fd',
+    300: '#7dd3fc',
+    500: '#0ea5e9',
+    600: '#0284c7',
+    700: '#0369a1',
+  },
+  rose: {
+    50: '#fff1f2',
+    100: '#ffe4e6',
+    200: '#fecdd3',
+    400: '#fb7185',
+    600: '#e11d48',
+    700: '#be123c',
+  },
+  amber: {
+    50: '#fffbeb',
+    600: '#d97706',
+    700: '#b45309',
+  },
+  violet: {
+    50: '#f5f3ff',
+    200: '#ddd6fe',
+    700: '#7c3aed',
+  },
+};
 
 const Report: React.FC = () => {
   const { data, results } = useData();
@@ -21,20 +67,35 @@ const Report: React.FC = () => {
 
   const handleDownloadPdf = async () => {
     setDownloading(true);
-    if (!reportRef.current) return;
+    if (!reportRef.current) {
+      setDownloading(false);
+      return;
+    }
+
     try {
       const canvas = await html2canvas(reportRef.current, {
-        scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        windowWidth: reportRef.current.scrollWidth,
+        windowHeight: reportRef.current.scrollHeight
       });
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const imgData = canvas.toDataURL('image/png');
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
       const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const ratio = Math.min(210 / imgWidth, 297 / imgHeight);
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth * ratio, imgHeight * ratio);
+      const imgData = canvas.toDataURL('image/png', 1.0);
+
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
       pdf.save(`Informe_ROI_DM_${new Date().toISOString().slice(0, 10)}.pdf`);
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      alert('Hubo un error al generar el PDF. Asegúrate de que todos los elementos se cargaron correctamente.');
     } finally {
       setDownloading(false);
     }
@@ -53,6 +114,7 @@ const Report: React.FC = () => {
           onClick={handleDownloadPdf}
           disabled={downloading}
           className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-700 transition-colors shadow-sm"
+          style={{ backgroundColor: HEX_COLORS.gray[900] }}
         >
           <Download size={16} />
           {downloading ? 'Generando...' : 'Descargar PDF'}
@@ -60,10 +122,17 @@ const Report: React.FC = () => {
       </div>
 
       {/* ══════════════ CONTENIDO DEL INFORME ══════════════ */}
-      <div ref={reportRef} className="space-y-6 bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+      <div
+        ref={reportRef}
+        className="space-y-6 bg-white p-8 rounded-2xl border shadow-sm"
+        style={{ backgroundColor: '#ffffff', borderColor: HEX_COLORS.gray[100] }}
+      >
 
         {/* CABECERA */}
-        <div className="flex items-start justify-between pb-6 border-b-2 border-gray-900">
+        <div
+          className="flex items-start justify-between pb-6 border-b-2"
+          style={{ borderBottomColor: HEX_COLORS.gray[900] }}
+        >
           <div className="flex items-center gap-4">
             <img src="/assets/logo-dm.png" alt="Digital Market" className="h-12 w-auto" />
             <div>
@@ -72,7 +141,7 @@ const Report: React.FC = () => {
             </div>
           </div>
           <div className="text-right text-xs text-gray-400">
-            <p className="font-bold text-gray-600 text-sm">Digital Market</p>
+            <p className="font-bold text-gray-600 text-sm" style={{ color: HEX_COLORS.gray[600] }}>Digital Market</p>
             <p>Partner Especialista HP</p>
             <p className="mt-1">{new Date().toLocaleDateString('es-ES')}</p>
           </div>
@@ -94,8 +163,16 @@ const Report: React.FC = () => {
           <SectionTitle icon={Monitor} label="Datos Introducidos en el Análisis" />
           <div className="grid md:grid-cols-2 gap-4 mt-3">
             {/* Situación actual */}
-            <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-              <div className="bg-rose-600 text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider">Máquina Actual — Solvente</div>
+            <div
+              className="rounded-xl border overflow-hidden"
+              style={{ backgroundColor: HEX_COLORS.gray[50], borderColor: HEX_COLORS.gray[200] }}
+            >
+              <div
+                className="text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider"
+                style={{ backgroundColor: HEX_COLORS.rose[600] }}
+              >
+                Máquina Actual — Solvente
+              </div>
               <div className="p-4 space-y-2">
                 <DataRow label="Modelo" value={data.currentMachineModel} />
                 <DataRow label="Volumen mensual" value={`${data.monthlyVolume} m²/mes`} />
@@ -109,8 +186,16 @@ const Report: React.FC = () => {
               </div>
             </div>
             {/* Solución HP */}
-            <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-              <div className="bg-sky-600 text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider">Solución HP Latex</div>
+            <div
+              className="rounded-xl border overflow-hidden"
+              style={{ backgroundColor: HEX_COLORS.gray[50], borderColor: HEX_COLORS.gray[200] }}
+            >
+              <div
+                className="text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider"
+                style={{ backgroundColor: HEX_COLORS.sky[600] }}
+              >
+                Solución HP Latex
+              </div>
               <div className="p-4 space-y-2">
                 <DataRow label="Modelo HP" value={data.hpMachineModel} />
                 <DataRow label="Velocidad HP (4 pasadas)" value={`${data.hpPrintSpeed} m²/h`} highlight="sky" />
@@ -124,8 +209,16 @@ const Report: React.FC = () => {
           </div>
 
           {/* Productos */}
-          <div className="mt-3 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-            <div className="bg-gray-700 text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider">Mix de Producción</div>
+          <div
+            className="mt-3 rounded-xl border overflow-hidden"
+            style={{ backgroundColor: HEX_COLORS.gray[50], borderColor: HEX_COLORS.gray[200] }}
+          >
+            <div
+              className="text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider"
+              style={{ backgroundColor: HEX_COLORS.gray[700] }}
+            >
+              Mix de Producción
+            </div>
             <div className="p-4 grid md:grid-cols-4 gap-4">
               <DataRow label="Lona %" value={`${data.lonaPercentage}%`} />
               <DataRow label="Precio venta lona" value={`${fc2(data.lonaSellPrice)}/m²`} />
@@ -138,46 +231,63 @@ const Report: React.FC = () => {
         {/* ── SECCIÓN 3: COMPARATIVA ECONÓMICA ── */}
         <div>
           <SectionTitle icon={Euro} label="Comparativa Económica Mensual" />
-          <div className="mt-3 rounded-xl border border-gray-200 overflow-hidden">
+          <div
+            className="mt-3 rounded-xl border overflow-hidden"
+            style={{ borderColor: HEX_COLORS.gray[200] }}
+          >
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-100 border-b border-gray-200">
+                <tr className="border-b" style={{ backgroundColor: HEX_COLORS.gray[100], borderBottomColor: HEX_COLORS.gray[200] }}>
                   <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase w-1/2">Concepto</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-rose-500 uppercase">Solvente Actual</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-sky-600 uppercase">HP Latex</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-emerald-600 uppercase">Diferencia</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: HEX_COLORS.rose[500] }}>Solvente Actual</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: HEX_COLORS.sky[600] }}>HP Latex</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: HEX_COLORS.emerald[600] }}>Diferencia</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y" style={{ divideColor: HEX_COLORS.gray[50] }}>
                 <tr className="bg-white">
                   <td className="px-4 py-3 text-gray-700 font-medium">Ventas estimadas</td>
                   <td className="px-4 py-3 text-right text-gray-900 font-bold">{fc(results.monthlyRevenue)}</td>
                   <td className="px-4 py-3 text-right text-gray-900 font-bold">{fc(results.monthlyRevenue)}</td>
                   <td className="px-4 py-3 text-right text-gray-400">—</td>
                 </tr>
-                <tr className="bg-gray-50/50">
+                <tr style={{ backgroundColor: HEX_COLORS.gray[50] }}>
                   <td className="px-4 py-3 text-gray-700 font-medium">Costes operativos (tinta + mano obra + esperas)</td>
-                  <td className="px-4 py-3 text-right text-rose-600 font-bold">−{fc(results.currentMonthlyCost)}</td>
-                  <td className="px-4 py-3 text-right text-emerald-600 font-bold">−{fc(results.hpMonthlyCost)}</td>
-                  <td className="px-4 py-3 text-right text-emerald-600 font-bold">+{fc(solventSaving)}</td>
+                  <td className="px-4 py-3 text-right font-bold" style={{ color: HEX_COLORS.rose[600] }}>−{fc(results.currentMonthlyCost)}</td>
+                  <td className="px-4 py-3 text-right font-bold" style={{ color: HEX_COLORS.emerald[600] }}>−{fc(results.hpMonthlyCost)}</td>
+                  <td className="px-4 py-3 text-right font-bold" style={{ color: HEX_COLORS.emerald[600] }}>+{fc(solventSaving)}</td>
                 </tr>
                 <tr className="bg-white">
                   <td className="px-4 py-3 text-gray-700 font-medium">Beneficio bruto</td>
                   <td className="px-4 py-3 text-right font-bold text-gray-900">{fc(results.currentMonthlyProfit)}</td>
                   <td className="px-4 py-3 text-right font-bold text-gray-900">{fc(results.hpMonthlyProfit)}</td>
-                  <td className="px-4 py-3 text-right text-emerald-600 font-bold">+{fc(results.hpMonthlyProfit - results.currentMonthlyProfit)}</td>
+                  <td className="px-4 py-3 text-right font-bold" style={{ color: HEX_COLORS.emerald[600] }}>+{fc(results.hpMonthlyProfit - results.currentMonthlyProfit)}</td>
                 </tr>
-                <tr className="bg-amber-50/60">
+                <tr style={{ backgroundColor: HEX_COLORS.amber[50] }}>
                   <td className="px-4 py-3 text-gray-700 font-medium">Cuota renting HP ({data.rentingMonths}m · {data.rentingInterest}%)</td>
                   <td className="px-4 py-3 text-right text-gray-400">No aplica</td>
-                  <td className="px-4 py-3 text-right text-amber-600 font-bold">−{fc(results.monthlyRentingQuota)}</td>
+                  <td className="px-4 py-3 text-right font-bold" style={{ color: HEX_COLORS.amber[600] }}>−{fc(results.monthlyRentingQuota)}</td>
                   <td className="px-4 py-3 text-right text-gray-400">Inversión</td>
                 </tr>
-                <tr className={`border-t-2 border-gray-200 ${roiOk ? 'bg-emerald-50' : 'bg-sky-50'}`}>
+                <tr
+                  className="border-t-2"
+                  style={{
+                    backgroundColor: roiOk ? HEX_COLORS.emerald[50] : HEX_COLORS.sky[50],
+                    borderTopColor: HEX_COLORS.gray[200]
+                  }}
+                >
                   <td className="px-4 py-3 font-black text-gray-900">Beneficio neto final</td>
                   <td className="px-4 py-3 text-right font-black text-gray-900">{fc(results.currentMonthlyProfit)}</td>
-                  <td className={`px-4 py-3 text-right font-black text-xl ${roiOk ? 'text-emerald-600' : 'text-sky-600'}`}>{fc(results.hpNetMonthlyProfit)}</td>
-                  <td className={`px-4 py-3 text-right font-black ${roiOk ? 'text-emerald-600' : 'text-sky-500'}`}>
+                  <td
+                    className="px-4 py-3 text-right font-black text-xl"
+                    style={{ color: roiOk ? HEX_COLORS.emerald[600] : HEX_COLORS.sky[600] }}
+                  >
+                    {fc(results.hpNetMonthlyProfit)}
+                  </td>
+                  <td
+                    className="px-4 py-3 text-right font-black"
+                    style={{ color: roiOk ? HEX_COLORS.emerald[600] : HEX_COLORS.sky[500] }}
+                  >
                     {roiOk ? '+' : ''}{fc(results.hpNetMonthlyProfit - results.currentMonthlyProfit)}
                   </td>
                 </tr>
@@ -186,11 +296,20 @@ const Report: React.FC = () => {
           </div>
 
           {/* Nota sobre el ROI */}
-          <div className={`mt-3 rounded-xl p-4 flex gap-3 ${roiOk ? 'bg-emerald-50 border border-emerald-200' : 'bg-sky-50 border border-sky-200'}`}>
-            {roiOk ? <CheckCircle className="text-emerald-600 flex-shrink-0 mt-0.5" size={18} /> : <AlertTriangle className="text-sky-600 flex-shrink-0 mt-0.5" size={18} />}
+          <div
+            className="mt-3 rounded-xl p-4 flex gap-3 border"
+            style={{
+              backgroundColor: roiOk ? HEX_COLORS.emerald[50] : HEX_COLORS.sky[50],
+              borderColor: roiOk ? HEX_COLORS.emerald[200] : HEX_COLORS.sky[200]
+            }}
+          >
+            {roiOk
+              ? <CheckCircle style={{ color: HEX_COLORS.emerald[600] }} className="flex-shrink-0 mt-0.5" size={18} />
+              : <AlertTriangle style={{ color: HEX_COLORS.sky[600] }} className="flex-shrink-0 mt-0.5" size={18} />
+            }
             <p className="text-sm text-gray-700 leading-relaxed">
               {roiOk
-                ? <><strong>La máquina se amortiza sola:</strong> el ahorro operativo ({fc(solventSaving)}/mes) cubre la cuota de renting ({fc(results.monthlyRentingQuota)}/mes) con un excedente de <strong className="text-emerald-600">{fc(results.hpNetMonthlyProfit - results.currentMonthlyProfit)}/mes</strong>.</>
+                ? <><strong>La máquina se amortiza sola:</strong> el ahorro operativo ({fc(solventSaving)}/mes) cubre la cuota de renting ({fc(results.monthlyRentingQuota)}/mes) con un excedente de <strong style={{ color: HEX_COLORS.emerald[600] }}>{fc(results.hpNetMonthlyProfit - results.currentMonthlyProfit)}/mes</strong>.</>
                 : <><strong>El ahorro operativo ({fc(solventSaving)}/mes)</strong> no cubre íntegramente la cuota de renting ({fc(results.monthlyRentingQuota)}/mes). La diferencia de {fc(results.monthlyRentingQuota - solventSaving)}/mes se compensa con <strong>mayor capacidad productiva diaria</strong> (sin esperas de 24-48h) y la posibilidad de aceptar más pedidos al día.</>
               }
             </p>
@@ -201,27 +320,49 @@ const Report: React.FC = () => {
         <div>
           <SectionTitle icon={Clock} label="Ventaja en Flujo de Trabajo" />
           <div className="mt-3 grid md:grid-cols-2 gap-4">
-            <div className="border border-rose-100 rounded-xl overflow-hidden">
-              <div className="bg-rose-50 px-4 py-2.5 text-xs font-black text-rose-700 uppercase">Proceso Actual (Solvente)</div>
+            <div
+              className="border rounded-xl overflow-hidden"
+              style={{ borderColor: HEX_COLORS.rose[100] }}
+            >
+              <div
+                className="px-4 py-2.5 text-xs font-black uppercase"
+                style={{ backgroundColor: HEX_COLORS.rose[50], color: HEX_COLORS.rose[700] }}
+              >
+                Proceso Actual (Solvente)
+              </div>
               <div className="p-4 space-y-2 text-sm">
                 <FlowStep num={1} label="Impresión" detail={`~${(data.monthlyVolume / (data.printSpeed * 168)).toFixed(0)}h producción mensual a ${data.printSpeed} m²/h`} bad />
                 <FlowStep num={2} label={`Desgasificación — esperar ${data.waitHours}h`} detail="Plotter de corte bloqueado" bad />
                 <FlowStep num={3} label="Laminado (si aplica)" detail="Solo posible tras desgasificación completa" bad />
                 <FlowStep num={4} label="Corte" detail="Solo cuando ha terminado todo lo anterior" bad />
-                <div className="mt-3 bg-rose-50 rounded-lg p-3 border border-rose-200">
-                  <p className="text-xs font-bold text-rose-700">Tiempo total hasta entrega: 26-52h mínimo con laminado</p>
+                <div
+                  className="mt-3 rounded-lg p-3 border"
+                  style={{ backgroundColor: HEX_COLORS.rose[50], borderColor: HEX_COLORS.rose[200] }}
+                >
+                  <p className="text-xs font-bold" style={{ color: HEX_COLORS.rose[700] }}>Tiempo total hasta entrega: 26-52h mínimo con laminado</p>
                 </div>
               </div>
             </div>
-            <div className="border-2 border-sky-300 rounded-xl overflow-hidden">
-              <div className="bg-sky-600 text-white px-4 py-2.5 text-xs font-black uppercase">Proceso HP Latex (sin esperas)</div>
+            <div
+              className="border-2 rounded-xl overflow-hidden"
+              style={{ borderColor: HEX_COLORS.sky[300] }}
+            >
+              <div
+                className="text-white px-4 py-2.5 text-xs font-black uppercase"
+                style={{ backgroundColor: HEX_COLORS.sky[600] }}
+              >
+                Proceso HP Latex (sin esperas)
+              </div>
               <div className="p-4 space-y-2 text-sm">
                 <FlowStep num={1} label="Impresión HP Latex" detail={`${data.hpPrintSpeed} m²/h — curado instantáneo en máquina`} ok />
                 <FlowStep num={2} label="Plotter libre durante impresión" detail="Puede cortar otro pedido mientras se imprime" ok />
                 <FlowStep num={3} label="Laminado (si aplica)" detail="Posible 1 min después de salir de impresora" ok />
                 <FlowStep num={4} label="Corte inmediato" detail="Sin esperar desgasificación" ok />
-                <div className="mt-3 bg-emerald-50 rounded-lg p-3 border border-emerald-200">
-                  <p className="text-xs font-bold text-emerald-700">Tiempo total hasta entrega: 2-5h mismo día</p>
+                <div
+                  className="mt-3 rounded-lg p-3 border"
+                  style={{ backgroundColor: HEX_COLORS.emerald[50], borderColor: HEX_COLORS.emerald[200] }}
+                >
+                  <p className="text-xs font-bold" style={{ color: HEX_COLORS.emerald[700] }}>Tiempo total hasta entrega: 2-5h mismo día</p>
                 </div>
               </div>
             </div>
@@ -238,8 +379,12 @@ const Report: React.FC = () => {
               { t: 'PrintOS Box — Recepción Automatizada', d: 'Tus clientes envían archivos directamente; validación automática, preflight y enrutamiento a producción.' },
               { t: 'API Abierta — Sin Coste Adicional', d: 'Integración con MIS, ERP o web-to-print. Actualizaciones automáticas gestionadas por HP.' },
             ].map(({ t, d }, i) => (
-              <div key={i} className="bg-gray-50 rounded-xl border border-gray-200 p-4">
-                <p className="text-xs font-black text-sky-700 mb-1">{t}</p>
+              <div
+                key={i}
+                className="rounded-xl border p-4"
+                style={{ backgroundColor: HEX_COLORS.gray[50], borderColor: HEX_COLORS.gray[200] }}
+              >
+                <p className="text-xs font-black mb-1" style={{ color: HEX_COLORS.sky[700] }}>{t}</p>
                 <p className="text-xs text-gray-500 leading-relaxed">{d}</p>
               </div>
             ))}
@@ -256,8 +401,17 @@ const Report: React.FC = () => {
               { badge: 'UL ECOLOGO', desc: 'Sin COVs, sin olores. Tinta base agua 65%. No requiere ventilación forzada.' },
               { badge: 'Energy Star', desc: 'Menor consumo energético certificado. Sin residuos tóxicos — cartuchos reciclables HP.' },
             ].map(({ badge, desc }, i) => (
-              <div key={i} className="bg-emerald-50 rounded-xl border border-emerald-200 p-4">
-                <span className="inline-block text-[10px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded mb-2 uppercase">{badge}</span>
+              <div
+                key={i}
+                className="rounded-xl border p-4"
+                style={{ backgroundColor: HEX_COLORS.emerald[50], borderColor: HEX_COLORS.emerald[200] }}
+              >
+                <span
+                  className="inline-block text-[10px] font-black text-white px-2 py-0.5 rounded mb-2 uppercase"
+                  style={{ backgroundColor: HEX_COLORS.emerald[600] }}
+                >
+                  {badge}
+                </span>
                 <p className="text-xs text-gray-600 leading-relaxed">{desc}</p>
               </div>
             ))}
@@ -267,22 +421,28 @@ const Report: React.FC = () => {
         {/* ── SECCIÓN 7: RENTING ── */}
         <div>
           <SectionTitle icon={Euro} label="Condiciones de Financiación (Renting)" />
-          <div className="mt-3 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+          <div
+            className="mt-3 rounded-xl border overflow-hidden"
+            style={{ backgroundColor: HEX_COLORS.gray[50], borderColor: HEX_COLORS.gray[200] }}
+          >
             <table className="w-full text-sm">
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y" style={{ divideColor: HEX_COLORS.gray[100] }}>
                 <tr><td className="px-4 py-2.5 text-gray-500">Precio máquina HP</td><td className="px-4 py-2.5 font-bold text-gray-900 text-right">{fc(data.hpMachinePrice)}</td></tr>
                 <tr><td className="px-4 py-2.5 text-gray-500">Duración del renting</td><td className="px-4 py-2.5 font-bold text-gray-900 text-right">{data.rentingMonths} meses ({data.rentingMonths / 12} años)</td></tr>
                 <tr><td className="px-4 py-2.5 text-gray-500">Tipo de interés anual</td><td className="px-4 py-2.5 font-bold text-gray-900 text-right">{data.rentingInterest}%</td></tr>
-                <tr className="bg-amber-50"><td className="px-4 py-2.5 font-bold text-gray-700">Cuota mensual renting</td><td className="px-4 py-2.5 font-black text-amber-600 text-right text-lg">{fc(results.monthlyRentingQuota)}</td></tr>
-                <tr><td className="px-4 py-2.5 text-gray-500">Ahorro operativo mensual HP vs Solvente</td><td className="px-4 py-2.5 font-bold text-emerald-600 text-right">{fc(solventSaving)}</td></tr>
-                <tr className="bg-gray-100"><td className="px-4 py-2.5 font-bold text-gray-700">El ahorro cubre el {Math.min(100, Math.round(rentingCoversRatio * 100))}% de la cuota</td><td className="px-4 py-2.5 font-black text-right">{fc(results.monthlyRentingQuota * Math.min(1, rentingCoversRatio))} / {fc(results.monthlyRentingQuota)}</td></tr>
+                <tr style={{ backgroundColor: HEX_COLORS.amber[50] }}><td className="px-4 py-2.5 font-bold text-gray-700">Cuota mensual renting</td><td className="px-4 py-2.5 font-black text-right text-lg" style={{ color: HEX_COLORS.amber[600] }}>{fc(results.monthlyRentingQuota)}</td></tr>
+                <tr><td className="px-4 py-2.5 text-gray-500">Ahorro operativo mensual HP vs Solvente</td><td className="px-4 py-2.5 font-bold text-right" style={{ color: HEX_COLORS.emerald[600] }}>{fc(solventSaving)}</td></tr>
+                <tr style={{ backgroundColor: HEX_COLORS.gray[100] }}><td className="px-4 py-2.5 font-bold text-gray-700">El ahorro cubre el {Math.min(100, Math.round(rentingCoversRatio * 100))}% de la cuota</td><td className="px-4 py-2.5 font-black text-right">{fc(results.monthlyRentingQuota * Math.min(1, rentingCoversRatio))} / {fc(results.monthlyRentingQuota)}</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
         {/* FOOTER */}
-        <div className="pt-4 border-t border-gray-200 flex justify-between items-center text-xs text-gray-400">
+        <div
+          className="pt-4 border-t flex justify-between items-center text-xs text-gray-400"
+          style={{ borderTopColor: HEX_COLORS.gray[200] }}
+        >
           <p>Digital Market · Partner Especialista HP Latex · <span className="font-bold">digital-market.es</span></p>
           <p>Informe generado automáticamente por Calculadora DM</p>
         </div>
@@ -296,7 +456,10 @@ const Report: React.FC = () => {
 
 const SectionTitle: React.FC<{ icon: React.ElementType; label: string }> = ({ icon: Icon, label }) => (
   <div className="flex items-center gap-2 mb-1">
-    <div className="w-6 h-6 bg-gray-900 rounded-md flex items-center justify-center flex-shrink-0">
+    <div
+      className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
+      style={{ backgroundColor: HEX_COLORS.gray[900] }}
+    >
       <Icon size={13} className="text-white" />
     </div>
     <h3 className="font-black text-gray-900 text-base">{label}</h3>
@@ -304,35 +467,53 @@ const SectionTitle: React.FC<{ icon: React.ElementType; label: string }> = ({ ic
 );
 
 const KpiCard: React.FC<{ label: string; value: string; sub: string; color: string }> = ({ label, value, sub, color }) => {
-  const bg: Record<string, string> = { emerald: 'bg-emerald-50 border-emerald-200', sky: 'bg-sky-50 border-sky-200', violet: 'bg-violet-50 border-violet-200', amber: 'bg-amber-50 border-amber-200' };
-  const text: Record<string, string> = { emerald: 'text-emerald-700', sky: 'text-sky-700', violet: 'text-violet-700', amber: 'text-amber-700' };
+  const bg = HEX_COLORS[color as keyof typeof HEX_COLORS][50];
+  const border = HEX_COLORS[color as keyof typeof HEX_COLORS][200];
+  const textColor = HEX_COLORS[color as keyof typeof HEX_COLORS][700];
+
   return (
-    <div className={`rounded-xl border p-4 ${bg[color]}`}>
+    <div className="rounded-xl border p-4" style={{ backgroundColor: bg, borderColor: border }}>
       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{label}</p>
-      <p className={`text-2xl font-black leading-tight ${text[color]}`}>{value}</p>
+      <p className="text-2xl font-black leading-tight" style={{ color: textColor }}>{value}</p>
       <p className="text-[10px] text-gray-400 mt-1">{sub}</p>
     </div>
   );
 };
 
 const DataRow: React.FC<{ label: string; value: string; highlight?: string }> = ({ label, value, highlight }) => {
-  const color = highlight === 'rose' ? 'text-rose-600 font-bold' : highlight === 'emerald' ? 'text-emerald-600 font-bold' : highlight === 'sky' ? 'text-sky-600 font-bold' : 'text-gray-900 font-medium';
+  let colorClass = 'text-gray-900 font-medium';
+  let inlineStyle = {};
+
+  if (highlight === 'rose') inlineStyle = { color: HEX_COLORS.rose[600], fontWeight: 'bold' };
+  else if (highlight === 'emerald') inlineStyle = { color: HEX_COLORS.emerald[600], fontWeight: 'bold' };
+  else if (highlight === 'sky') inlineStyle = { color: HEX_COLORS.sky[600], fontWeight: 'bold' };
+
   return (
     <div className="flex justify-between items-baseline gap-2">
       <span className="text-xs text-gray-500 flex-shrink-0">{label}</span>
-      <span className={`text-xs text-right ${color}`}>{value}</span>
+      <span className="text-xs text-right" style={inlineStyle}>{value}</span>
     </div>
   );
 };
 
-const FlowStep: React.FC<{ num: number; label: string; detail: string; ok?: boolean; bad?: boolean }> = ({ num, label, detail, ok, bad }) => (
-  <div className="flex items-start gap-3">
-    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5 ${ok ? 'bg-emerald-500 text-white' : bad ? 'bg-rose-400 text-white' : 'bg-gray-200 text-gray-500'}`}>{num}</div>
-    <div>
-      <p className={`text-xs font-bold leading-tight ${ok ? 'text-emerald-700' : bad ? 'text-rose-700' : 'text-gray-700'}`}>{label}</p>
-      <p className="text-[10px] text-gray-400 mt-0.5">{detail}</p>
+const FlowStep: React.FC<{ num: number; label: string; detail: string; ok?: boolean; bad?: boolean }> = ({ num, label, detail, ok, bad }) => {
+  const circleBg = ok ? HEX_COLORS.emerald[500] : bad ? HEX_COLORS.rose[400] : HEX_COLORS.gray[200];
+  const textColor = ok ? HEX_COLORS.emerald[700] : bad ? HEX_COLORS.rose[700] : HEX_COLORS.gray[700];
+
+  return (
+    <div className="flex items-start gap-3">
+      <div
+        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5"
+        style={{ backgroundColor: circleBg, color: ok || bad ? '#ffffff' : HEX_COLORS.gray[500] }}
+      >
+        {num}
+      </div>
+      <div>
+        <p className="text-xs font-bold leading-tight" style={{ color: textColor }}>{label}</p>
+        <p className="text-[10px] text-gray-400 mt-0.5">{detail}</p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default Report;
