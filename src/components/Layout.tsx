@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard,
   Calculator,
-  Workflow,
+  GitCompare,
   Leaf,
   FileText,
   Settings,
@@ -21,38 +20,38 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navItems = [
     { path: '/', label: 'Calculadora', icon: Calculator },
     { path: '/cost-breakdown', label: 'Costes', icon: DollarSign },
-    { path: '/workflow', label: 'Flujo de Trabajo', icon: Workflow },
+    { path: '/workflow', label: 'Flujo de Trabajo', icon: GitCompare },
     { path: '/technical', label: 'Detalle Técnico', icon: Settings },
     { path: '/sustainability', label: 'Sostenibilidad', icon: Leaf },
     { path: '/report', label: 'Informe Final', icon: FileText },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex flex-col md:flex-row">
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col md:flex-row" style={{ fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}>
       {/* Mobile Header */}
-      <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-2">
-          <img src="/assets/logo-hp.png" alt="HP" className="h-8 w-auto" />
-          <span className="font-bold text-gray-800">Comparativa</span>
-        </div>
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600">
-          {isMobileMenuOpen ? <X /> : <Menu />}
+      <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <img src="/assets/logo-dm.png" alt="Digital Market" className="h-8 w-auto" />
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
-      {/* Sidebar Navigation (Desktop) */}
+      {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:h-screen flex flex-col",
+        "fixed inset-y-0 left-0 z-40 w-56 bg-white border-r border-gray-100 transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:h-screen flex flex-col shadow-sm",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-6 border-b border-gray-100 flex items-center gap-3">
-          <img src="/assets/logo-hp.png" alt="HP" className="h-10 w-auto" />
-          <div>
-            <h1 className="font-bold text-gray-900 leading-tight text-sm">ROI<br />Comparativa</h1>
-          </div>
+        {/* Logo */}
+        <div className="px-5 py-5 border-b border-gray-100">
+          <img src="/assets/logo-dm.png" alt="Digital Market" className="h-10 w-auto" />
+          <p className="text-[10px] text-gray-400 font-medium mt-2 uppercase tracking-widest">Calculadora ROI</p>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        {/* Nav */}
+        <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -62,30 +61,38 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 to={item.path}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 group relative",
                   isActive
-                    ? "bg-sky-50 text-sky-700"
-                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
                 )}
               >
-                <Icon size={20} className={cn(isActive ? "text-sky-600" : "text-gray-400 group-hover:text-gray-600")} />
-                <span>{item.label}</span>
+                <Icon size={16} className="flex-shrink-0" />
+                <span className="font-medium text-sm">{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-100">
-          <div className="bg-gradient-to-r from-sky-50 to-emerald-50 rounded-lg p-4 border border-gray-100">
-            <p className="text-xs text-gray-500 mb-2">Powered by</p>
-            <p className="text-xs font-bold text-gray-700">Digital Market</p>
-            <p className="text-xs text-gray-500 mt-2">Herramienta de Análisis ROI</p>
-          </div>
+        {/* Footer */}
+        <div className="px-4 py-4 border-t border-gray-100">
+          <p className="text-[10px] text-gray-400 font-medium leading-relaxed">
+            Calculadora DM — Digital Market<br />
+            Herramienta de Análisis ROI HP Latex
+          </p>
         </div>
       </aside>
 
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 z-30 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto h-[calc(100vh-64px)] md:h-screen bg-gray-50">
+      <main className="flex-1 overflow-y-auto h-[calc(100vh-57px)] md:h-screen bg-gray-50">
         <div className="max-w-6xl mx-auto p-4 md:p-8 pb-24">
           {children}
         </div>

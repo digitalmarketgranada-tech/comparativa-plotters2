@@ -1,400 +1,305 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
-import { Clock, CheckCircle, AlertTriangle, Users, Zap, Download, BarChart3 } from 'lucide-react';
+import { Clock, CheckCircle, AlertTriangle, Users, Zap, BarChart3 } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 const Workflow: React.FC = () => {
   const { data, results } = useData();
-  const workflowRef = useRef<HTMLDivElement>(null);
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
 
-  const handleDownloadPdf = async () => {
-    if (!workflowRef.current) return;
-
-    try {
-      const canvas = await html2canvas(workflowRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      pdf.save('HP_Latex_Workflow_Comparativa.pdf');
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    }
-  };
-
   return (
-    <div className="space-y-8">
-      <div className="sticky top-0 z-10 bg-white shadow-sm border-b border-gray-200 -mx-8 px-8 py-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Flujo de Trabajo</h1>
-          <button
-            onClick={handleDownloadPdf}
-            className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
-          >
-            <Download size={18} />
-            Descargar Comparativa PDF
-          </button>
-        </div>
+    <div className="space-y-8 max-w-5xl mx-auto">
+      <header>
+        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Flujo de Trabajo</h1>
+        <p className="text-gray-500 mt-1">Comparativa real de tiempos: impresión, laminación y corte.</p>
+      </header>
+
+      {/* KPI Cards */}
+      <div className="grid md:grid-cols-3 gap-4">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center"
+        >
+          <p className="text-3xl font-black text-amber-600 mb-1">{data.monthlyVolume} m²</p>
+          <p className="text-sm text-gray-500">Volumen mensual</p>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+          className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center"
+        >
+          <p className="text-3xl font-black text-emerald-600 mb-1">24-48h</p>
+          <p className="text-sm text-gray-500">Espera eliminada con HP Latex</p>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+          className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center"
+        >
+          <p className="text-3xl font-black text-sky-600 mb-1">{formatCurrency(results.monthlySavings || 0)}</p>
+          <p className="text-sm text-gray-500">Ahorro mensual total</p>
+        </motion.div>
       </div>
 
-      <div className="max-w-6xl mx-auto space-y-8" ref={workflowRef}>
-        <header className="text-center mb-12 pt-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-6 text-amber-600">
-            <Clock size={32} />
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Ahorra un <span className="text-amber-600">40% de tiempo real</span>
-          </h1>
-          <p className="text-gray-500 text-lg max-w-xl mx-auto">
-            Comparación de tiempos de producción total: Impresión y Corte
+      {/* ─── NOTA IMPORTANTE ─── */}
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4">
+        <div className="w-9 h-9 rounded-xl bg-amber-400 flex items-center justify-center flex-shrink-0">
+          <AlertTriangle size={18} className="text-white" />
+        </div>
+        <div>
+          <p className="font-bold text-amber-900 text-sm mb-1">Contexto del flujo comparado</p>
+          <p className="text-amber-800 text-sm leading-relaxed">
+            En ambos sistemas, la <strong>impresora y el plotter de corte son dos máquinas independientes</strong>. El corte comienza siempre después de que finalice la impresión. La diferencia clave está en el tiempo de espera entre ambas fases, y en la <strong>disponibilidad del plotter durante la impresión</strong>.
           </p>
-        </header>
+        </div>
+      </div>
 
-        {/* KPI Cards */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center"
-          >
-            <p className="text-4xl font-bold text-amber-600 mb-2">{data.monthlyVolume}m²</p>
-            <p className="text-sm text-gray-600">Volumen mensual procesado</p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center"
-          >
-            <p className="text-4xl font-bold text-emerald-600 mb-2">24+ h</p>
-            <p className="text-sm text-gray-600">Ahorro por lote de trabajo</p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center"
-          >
-            <p className="text-4xl font-bold text-sky-600 mb-2">{formatCurrency(results.monthlySavings || 0)}</p>
-            <p className="text-sm text-gray-600">Ahorro mensual total</p>
-          </motion.div>
+      {/* ─── FLUJO SOLVENTE ─── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-2xl shadow-sm border border-rose-100 overflow-hidden"
+      >
+        <div className="bg-rose-50 px-6 py-4 border-b border-rose-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="text-rose-500" size={20} />
+            <h3 className="text-lg font-black text-gray-900">Roland / Mimaki / Epson — Eco-Solvente</h3>
+          </div>
+          <span className="text-xs font-bold bg-rose-100 text-rose-600 px-3 py-1 rounded-full uppercase">Sin laminado: solo corte</span>
         </div>
 
-        {/* Timeline Comparison */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 relative overflow-hidden"
-        >
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="text-rose-500" />
-              <h3 className="text-xl font-bold text-gray-800">Flujo Convencional (Solvente)</h3>
-            </div>
-            <span className="text-sm font-medium text-gray-400 uppercase tracking-wider">Competencia</span>
-          </div>
+        <div className="p-6 space-y-6">
+          {/* Timeline visual */}
+          <div className="space-y-3">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Línea de tiempo (ejemplo: 1 trabajo)</p>
 
-          <div className="relative py-12">
-            {/* Timeline Bar with emphasized bottleneck */}
-            <div className="flex h-20 w-full rounded-lg overflow-hidden bg-gray-100 shadow-inner">
-              <div className="w-[30%] bg-gray-400 flex items-center justify-center text-white font-bold text-sm relative border-r border-white/20">
-                Impresión
-              </div>
-
-              {/* HEAVY BOTTLENECK SECTION */}
-              <div className="w-[40%] bg-rose-500 flex flex-col items-center justify-center relative group overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-rose-400 animate-pulse transition-opacity"></div>
-                <div className="relative z-10 flex flex-col items-center">
-                  <span className="text-white font-black text-xl tracking-tighter uppercase italic">STOP</span>
-                  <span className="text-white font-bold text-sm">24h - 48h</span>
-                </div>
-                {/* Horizontal progress indicators */}
-                <div className="absolute inset-0 flex items-center justify-around opacity-30">
-                  <Clock className="text-white animate-spin-slow" size={24} />
-                  <Clock className="text-white animate-spin-slow" size={24} />
-                </div>
-              </div>
-
-              <div className="w-[30%] bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-sm relative border-l border-white/20">
-                Corte
-              </div>
-            </div>
-
-            {/* Legend/Labels for the bottleneck */}
-            <div className="absolute left-[30%] right-[30%] -top-6 text-center">
-              <span className="bg-rose-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-md">
-                CUELLO DE BOTELLA: DESGASIFICACIÓN
-              </span>
-            </div>
-
-            <div className="flex justify-between mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
-              <span>Inicio Día 1</span>
-              <span className="text-rose-600">Fin Día 2 o 3</span>
-            </div>
-          </div>
-
-          <div className="mt-6 p-6 bg-rose-50 rounded-xl border-2 border-rose-200 flex items-start gap-4">
-            <div className="w-10 h-10 bg-rose-600 rounded-lg flex items-center justify-center text-white shrink-0 shadow-lg">
-              <AlertTriangle size={20} />
-            </div>
+            {/* Escenario A: Sin laminado */}
             <div>
-              <p className="text-rose-900 font-bold mb-1 italic">Interrupción Crítica del Flujo:</p>
-              <p className="text-rose-700 text-sm leading-relaxed">
-                El proceso es puramente secuencial y dependiente. El material solvente <strong>debe reposar obligatoriamente</strong> para eliminar gases antes de poder cargarse en el plotter. Esto rompe cualquier posibilidad de entrega rápida y ocupa espacio físico innecesario en tu taller.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* HP Flow */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-sky-50 rounded-xl p-8 shadow-sm border border-sky-100 relative overflow-hidden"
-        >
-          <div className="flex justify-between items-center mb-8 relative z-10">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="text-sky-600" />
-              <h3 className="text-xl font-bold text-gray-900">Solución HP Latex + Summa</h3>
-            </div>
-            <span className="bg-sky-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-              Recomendado
-            </span>
-          </div>
-
-          <div className="relative py-8 z-10">
-            {/* Timeline Container */}
-            <div className="relative h-24 w-full">
-              {/* Printing Phase */}
-              <div className="absolute top-0 left-0 h-10 w-[45%] bg-sky-600 rounded-l-lg rounded-tr-lg flex items-center justify-center text-white font-bold shadow-sm z-20">
-                Impresión HP
-              </div>
-
-              {/* Cutting Phase (Overlapping) */}
-              <div className="absolute top-6 left-[10%] h-10 w-[45%] bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold shadow-sm z-30 border-2 border-white">
-                Corte Simultáneo
-              </div>
-
-              {/* Total Time Marker */}
-              <div className="absolute top-0 left-0 w-[55%] h-full border-b-2 border-dashed border-sky-300 pointer-events-none"></div>
-              <div className="absolute bottom-0 left-[55%] text-sky-700 font-bold text-sm translate-y-6">Fin (1h 45m)</div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 mt-8 relative z-10">
-            <div className="bg-white p-4 rounded-lg border border-sky-100 text-center shadow-sm">
-              <span className="block text-3xl font-bold text-sky-600 mb-1">40%</span>
-              <span className="text-xs text-gray-500 uppercase tracking-wide font-bold">Más Rápido</span>
-            </div>
-            <div className="bg-white p-4 rounded-lg border border-sky-100 text-center shadow-sm">
-              <span className="block text-3xl font-bold text-emerald-500 mb-1">0h</span>
-              <span className="text-xs text-gray-500 uppercase tracking-wide font-bold">Espera Secado</span>
-            </div>
-            <div className="bg-white p-4 rounded-lg border border-sky-100 text-center shadow-sm">
-              <span className="block text-3xl font-bold text-amber-500 mb-1">24x</span>
-              <span className="text-xs text-gray-500 uppercase tracking-wide font-bold">Más Entregas</span>
-            </div>
-          </div>
-
-          <div className="mt-6 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-            <p className="text-gray-700 text-sm font-medium mb-2">✓ Ventaja competitiva:</p>
-            <p className="text-gray-600 text-sm">Impresión y corte simultáneos. Curado instantáneo de la tinta al calor. Entrega en 2-3 horas vs 24-50 horas. Ideal para clientes que necesitan entrega rápida.</p>
-          </div>
-        </motion.div>
-
-        {/* Step by Step Comparison */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mt-12 pt-12 border-t border-gray-200"
-        >
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Proceso Detallado Paso a Paso</h2>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Solvente Process */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-6">
-                <div className="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold">⏱</div>
-                Flujo Solvente Tradicional (26.5 - 50.5h)
-              </h3>
-
-              <div className="space-y-3">
-                {[
-                  { step: 1, time: "0 min", title: "Preparar Material", desc: "Cargar rollo/hoja en la impresora" },
-                  { step: 2, time: "45 min", title: "Imprimir", desc: `Impresión a ${data.printSpeed}m²/h (ej: ${data.monthlyVolume}m²)` },
-                  { step: 3, time: "24-48 h", title: "Desgasificación", desc: "Material debe 'respirar' para eliminar solventes volátiles - TIEMPO CRÍTICO" },
-                  { step: 4, time: "30 min", title: "Transferir Material", desc: "Mover a plotter de corte (manual o con sistema)" },
-                  { step: 5, time: "1-2 h", title: "Cortar", desc: "Proceso de corte según diseño" },
-                  { step: 6, time: "Total", title: "De Pedido a Producto Final", desc: "Entre 26.5 a 50.5 horas de espera real" },
-                ].map((item, idx) => (
-                  <div key={idx} className="flex gap-4 items-start p-4 bg-rose-50 rounded-lg border border-rose-100 hover:shadow-md transition-shadow">
-                    <div className="w-10 h-10 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center shrink-0 font-bold text-sm">
-                      {item.step}
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-bold text-gray-900 flex justify-between items-start gap-2">
-                        {item.title}
-                        <span className="text-xs bg-rose-200 text-rose-700 px-2 py-1 rounded font-mono whitespace-nowrap">{item.time}</span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">{item.desc}</p>
-                    </div>
+              <p className="text-xs font-semibold text-gray-500 mb-2">Escenario A — <span className="text-rose-600 font-bold">Sin laminado</span> (más favorable)</p>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right">Impresora</span>
+                  <div className="flex h-8 flex-1 rounded-lg overflow-hidden bg-gray-100 text-xs font-bold">
+                    <div className="bg-rose-400 flex items-center justify-center text-white" style={{ width: '30%' }}>Impresión</div>
+                    <div className="bg-rose-200 flex items-center justify-center text-rose-700" style={{ width: '70%' }}>— libre —</div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* HP Latex Process */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-6">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">⚡</div>
-                Flujo HP Latex Print & Cut (2-3h)
-              </h3>
-
-              <div className="space-y-3">
-                {[
-                  { step: 1, time: "0 min", title: "Preparar Material", desc: "Cargar rollo en HP Latex 630 Print & Cut" },
-                  { step: 2, time: "45 min", title: "Imprimir", desc: "Impresión HP Latex 18m²/h - Tinta se cura al instante con calor" },
-                  { step: 3, time: "0 min", title: "✓ Corte Simultáneo", desc: "Módulo Summa comienza mientras finaliza impresión (sin pausas)" },
-                  { step: 4, time: "1-2 h", title: "Corte Final", desc: "Completa el corte sin tiempos de espera" },
-                  { step: 5, time: "0 min", title: "Producto Listo", desc: "Laminación o acabado inmediato - Sin esperas de secado" },
-                  { step: 6, time: "Total", title: "De Pedido a Producto Final", desc: "Solo 2-3 horas de tiempo real (10x más rápido)" },
-                ].map((item, idx) => (
-                  <div key={idx} className="flex gap-4 items-start p-4 bg-emerald-50 rounded-lg border border-emerald-100 hover:shadow-md transition-shadow">
-                    <div className="w-10 h-10 rounded-full bg-emerald-200 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-sm">
-                      {item.step}
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-bold text-gray-900 flex justify-between items-start gap-2">
-                        {item.title}
-                        <span className="text-xs bg-emerald-200 text-emerald-700 px-2 py-1 rounded font-mono whitespace-nowrap">{item.time}</span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">{item.desc}</p>
-                    </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right">Desgasific.</span>
+                  <div className="flex h-8 flex-1 rounded-lg overflow-hidden bg-gray-100 text-xs font-bold">
+                    <div className="bg-gray-200 flex items-center justify-center text-gray-400" style={{ width: '30%' }}></div>
+                    <div className="bg-orange-400 flex items-center justify-center text-white" style={{ width: '40%' }}>⏳ 24-48h espera</div>
+                    <div className="bg-gray-100 flex items-center justify-center text-gray-300" style={{ width: '30%' }}></div>
                   </div>
-                ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right">Plotter corte</span>
+                  <div className="flex h-8 flex-1 rounded-lg overflow-hidden bg-gray-100 text-xs font-bold">
+                    <div className="bg-gray-100 flex items-center justify-center text-gray-300" style={{ width: '70%' }}>— bloqueado / en espera —</div>
+                    <div className="bg-rose-500 flex items-center justify-center text-white" style={{ width: '30%' }}>Corte</div>
+                  </div>
+                </div>
               </div>
+              <p className="text-xs text-rose-600 font-semibold mt-2 ml-28">⚠ El plotter de corte está BLOQUEADO esperando la desgasificación (24-48h)</p>
+            </div>
+
+            {/* Escenario B: Con laminado */}
+            <div className="mt-4 pt-4 border-t border-dashed border-gray-200">
+              <p className="text-xs font-semibold text-gray-500 mb-2">Escenario B — <span className="text-rose-700 font-bold">Con laminado</span></p>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right">Impresión</span>
+                  <div className="bg-rose-400 h-8 flex items-center justify-center text-white text-xs font-bold rounded-lg" style={{ width: '20%' }}>Imprimir</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right">Desgasific.</span>
+                  <div className="bg-orange-400 h-8 flex items-center justify-center text-white text-xs font-bold rounded-lg ml-[20%]" style={{ width: '40%' }}>⏳ 24-48h OBLIGATORIO</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right">Laminado</span>
+                  <div className="bg-amber-400 h-8 flex items-center justify-center text-white text-xs font-bold rounded-lg ml-[60%]" style={{ width: '25%' }}>Laminar</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right">Plotter corte</span>
+                  <div className="bg-rose-600 h-8 flex items-center justify-center text-white text-xs font-bold rounded-lg ml-[85%]" style={{ width: '15%' }}>Corte</div>
+                </div>
+              </div>
+              <p className="text-xs text-rose-700 font-bold mt-2 ml-28">⛔ Pedido entregado en DÍA 3 mínimo. Plotter libre pero sin trabajo productivo hasta el final.</p>
             </div>
           </div>
-        </motion.div>
 
-        {/* Impact Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-gradient-to-r from-sky-50 to-emerald-50 rounded-xl p-8 border border-sky-200 mt-12"
-        >
-          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <BarChart3 size={24} className="text-sky-600" />
-            Impacto en tu Negocio
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="text-center bg-white rounded-lg p-6 shadow-sm">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-4">
-                <Clock className="w-8 h-8 text-amber-600" />
+          {/* Key limitation */}
+          <div className="bg-rose-50 rounded-xl p-4 border border-rose-200">
+            <p className="text-sm font-bold text-rose-900 mb-2">📌 Limitación estructural del eco-solvente:</p>
+            <ul className="text-sm text-rose-800 space-y-1.5">
+              <li>• El plotter de corte <strong>no puede trabajar en otro pedido</strong> si está esperando el material actual</li>
+              <li>• Con laminado, el flujo es completamente secuencial: imprimir → esperar → laminar → cortar</li>
+              <li>• Sin laminado se puede cortar antes, pero la espera de desgasificación sigue siendo obligatoria</li>
+            </ul>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ─── FLUJO HP LATEX ─── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="bg-white rounded-2xl shadow-sm border-2 border-sky-300 overflow-hidden ring-4 ring-sky-50"
+      >
+        <div className="bg-gradient-to-r from-sky-600 to-blue-700 px-6 py-4 flex items-center justify-between text-white">
+          <div className="flex items-center gap-3">
+            <CheckCircle size={20} />
+            <h3 className="text-lg font-black">HP Latex — Flujo Continuo</h3>
+          </div>
+          <span className="bg-emerald-400 text-emerald-900 text-[10px] font-black px-3 py-1 rounded-full uppercase">RECOMENDADO</span>
+        </div>
+
+        <div className="p-6 space-y-6">
+          <div className="space-y-3">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Línea de tiempo (ejemplo: 1 trabajo)</p>
+
+            {/* Escenario A: Sin laminado */}
+            <div>
+              <p className="text-xs font-semibold text-gray-500 mb-2">Escenario A — <span className="text-emerald-600 font-bold">Sin laminado</span></p>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right">HP Latex</span>
+                  <div className="flex h-8 flex-1 rounded-lg overflow-hidden bg-gray-100 text-xs font-bold">
+                    <div className="bg-sky-500 flex items-center justify-center text-white" style={{ width: '40%' }}>Impresión</div>
+                    <div className="bg-sky-100 flex items-center justify-center text-sky-400" style={{ width: '60%' }}>— libre para otro trabajo —</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right">Plotter corte</span>
+                  <div className="flex h-8 flex-1 rounded-lg overflow-hidden bg-gray-100 text-xs font-bold">
+                    <div className="bg-sky-100 flex items-center justify-center text-sky-400" style={{ width: '40%' }}>— libre (otro pedido) ✓</div>
+                    <div className="bg-emerald-500 flex items-center justify-center text-white" style={{ width: '30%' }}>Cortar ← inmediato</div>
+                    <div className="bg-emerald-100 flex items-center justify-center text-emerald-400" style={{ width: '30%' }}>libre</div>
+                  </div>
+                </div>
               </div>
-              <p className="font-bold text-gray-900 text-lg">10x Más Rápido</p>
-              <p className="text-sm text-gray-600 mt-1">Entrega en 2-3 horas vs 24-50 horas</p>
-              <p className="text-xs text-amber-600 font-bold mt-2">Ahorro: 24+ horas/lote</p>
+              <p className="text-xs text-sky-600 font-semibold mt-2 ml-28">✓ El plotter de corte trabaja en otros pedidos MIENTRAS el HP Latex imprime</p>
             </div>
-            <div className="text-center bg-white rounded-lg p-6 shadow-sm">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                <Users className="w-8 h-8 text-blue-600" />
+
+            {/* Escenario B: Con laminado */}
+            <div className="mt-4 pt-4 border-t border-dashed border-gray-200">
+              <p className="text-xs font-semibold text-gray-500 mb-2">Escenario B — <span className="text-sky-700 font-bold">Con laminado</span></p>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right">HP Latex</span>
+                  <div className="bg-sky-500 h-8 flex items-center justify-center text-white text-xs font-bold rounded-lg" style={{ width: '30%' }}>Imprime (curado al instante)</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right">Laminado</span>
+                  <div className="flex gap-0.5 ml-[30%]" style={{ width: '22%' }}>
+                    <span className="text-xs text-emerald-600 font-bold flex items-center">← tras 1 minuto de enfriamiento</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right"></span>
+                  <div className="bg-amber-400 h-8 flex items-center justify-center text-white text-xs font-bold rounded-lg ml-[30%]" style={{ width: '25%' }}>Laminar</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-24 text-xs text-gray-500 font-medium flex-shrink-0 text-right">Plotter corte</span>
+                  <div className="bg-emerald-500 h-8 flex items-center justify-center text-white text-xs font-bold rounded-lg ml-[55%]" style={{ width: '20%' }}>Cortar</div>
+                </div>
               </div>
-              <p className="font-bold text-gray-900 text-lg">Menos Intervención</p>
-              <p className="text-sm text-gray-600 mt-1">Automático: imprime y corta sin pausas</p>
-              <p className="text-xs text-blue-600 font-bold mt-2">Operario solo supervisa</p>
-            </div>
-            <div className="text-center bg-white rounded-lg p-6 shadow-sm">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 rounded-full mb-4">
-                <Zap className="w-8 h-8 text-emerald-600" />
-              </div>
-              <p className="font-bold text-gray-900 text-lg">Máxima Producción</p>
-              <p className="text-sm text-gray-600 mt-1">Solo limitado por velocidad de impresión</p>
-              <p className="text-xs text-emerald-600 font-bold mt-2">+500% más entregas/día</p>
+              <p className="text-xs text-emerald-700 font-bold mt-2 ml-28">✓ Pedido entregado en 2-3 horas. Sin esperas de desgasificación.</p>
             </div>
           </div>
-        </motion.div>
 
-        {/* TCO Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-white rounded-xl p-8 border border-gray-200 mt-8"
-        >
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Resumen Económico</h3>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="border-l-4 border-rose-500 pl-6">
-              <p className="text-sm text-gray-500 uppercase tracking-wide font-bold mb-1">Coste Mensual (Solvente)</p>
-              <p className="text-3xl font-bold text-gray-900">{formatCurrency(results.currentMonthlyCost)}</p>
-              <p className="text-xs text-gray-600 mt-2">Con tiempos de espera incluidos</p>
+          {/* Ventaja clave */}
+          <div className="grid md:grid-cols-3 gap-3">
+            <div className="bg-sky-50 rounded-xl p-4 border border-sky-100 text-center">
+              <p className="text-2xl font-black text-sky-600 mb-1">0 min</p>
+              <p className="text-xs text-gray-500 font-semibold">Espera de desgasificación</p>
             </div>
-            <div className="border-l-4 border-sky-500 pl-6">
-              <p className="text-sm text-gray-500 uppercase tracking-wide font-bold mb-1">Coste Mensual (HP Latex)</p>
-              <p className="text-3xl font-bold text-gray-900">{formatCurrency(results.hpMonthlyCost)}</p>
-              <p className="text-xs text-gray-600 mt-2">Sin tiempos de espera</p>
+            <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100 text-center">
+              <p className="text-2xl font-black text-emerald-600 mb-1">1 min</p>
+              <p className="text-xs text-gray-500 font-semibold">Enfriamiento para laminar</p>
             </div>
-            <div className="border-l-4 border-emerald-500 pl-6">
-              <p className="text-sm text-gray-500 uppercase tracking-wide font-bold mb-1">Ahorro Mensual</p>
-              <p className="text-3xl font-bold text-emerald-600">{formatCurrency(results.monthlySavings || 0)}</p>
-              <p className="text-xs text-emerald-700 mt-2">ROI en {results.roiMonths?.toFixed(1) || '19'} meses</p>
+            <div className="bg-amber-50 rounded-xl p-4 border border-amber-100 text-center">
+              <p className="text-2xl font-black text-amber-600 mb-1">Libre</p>
+              <p className="text-xs text-gray-500 font-semibold">Plotter corte durante impresión</p>
             </div>
           </div>
-        </motion.div>
-      </div>
 
-      {/* Recommendations */}
-      <div className="max-w-6xl mx-auto bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-8 border border-amber-200">
-        <h3 className="text-xl font-bold text-gray-900 mb-4">Recomendaciones Estratégicas</h3>
-        <ul className="space-y-4 text-gray-700">
-          <li className="flex items-start gap-3">
-            <CheckCircle size={20} className="text-emerald-600 shrink-0 mt-0.5" />
-            <span className="text-lg"><strong>HP Latex 630 P&C</strong> es la clave para ofrecer plazos de entrega imbatibles y ganar competitividad.</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <CheckCircle size={20} className="text-emerald-600 shrink-0 mt-0.5" />
-            <span className="text-lg">La <strong>eliminación de esperas</strong> incrementa tu capacidad productiva diaria, permitiéndote capturar nuevas oportunidades comerciales.</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <CheckCircle size={20} className="text-emerald-600 shrink-0 mt-0.5" />
-            <span className="text-lg">Un <strong>flujo 100% automatizado</strong> minimiza el error humano y maximiza el retorno de tu inversión operativa.</span>
-          </li>
-        </ul>
-      </div>
+          <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
+            <p className="text-sm font-bold text-emerald-900 mb-2">✅ Ventaja estructural del HP Latex:</p>
+            <ul className="text-sm text-emerald-800 space-y-1.5">
+              <li>• La tinta se cura con calor <strong>dentro de la impresora</strong> — el material sale listo</li>
+              <li>• <strong>Sin laminado:</strong> el plotter de corte puede trabajar en otro pedido mientras el HP Latex imprime</li>
+              <li>• <strong>Con laminado:</strong> solo 1 minuto de enfriamiento, sin 24-48h de espera química</li>
+              <li>• Capacidad de producir y entregar <strong>varios pedidos al día</strong> sin cuellos de botella</li>
+            </ul>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ─── TABLA RESUMEN ─── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+      >
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
+          <h3 className="font-black text-gray-900">Comparativa Resumen</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Situación</th>
+                <th className="text-center px-4 py-3 text-xs font-bold text-rose-500 uppercase">Roland / Mimaki / Epson</th>
+                <th className="text-center px-4 py-3 text-xs font-bold text-sky-600 uppercase">HP Latex</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {[
+                { label: 'Plotter libre durante impresión', comp: '❌ No (mismo pedido bloquea)', hp: '✅ Sí (otro pedido puede cortar)' },
+                { label: 'Tiempo entre impresión y corte (sin laminado)', comp: '⏳ 24-48h desgasificación', hp: '✅ 0h — inmediato' },
+                { label: 'Tiempo entre impresión y laminado', comp: '⛔ 24-48h obligatorio', hp: '✅ ~1 min enfriamiento' },
+                { label: 'Tiempo entre laminado y corte', comp: '30 min adicionales', hp: '30 min (igual)' },
+                { label: 'Entrega total (sin laminado)', comp: '24-50h desde inicio', hp: '2-3h desde inicio' },
+                { label: 'Entrega total (con laminado)', comp: '26-52h desde inicio', hp: '3-5h desde inicio' },
+              ].map((row, i) => (
+                <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
+                  <td className="px-6 py-3.5 font-medium text-gray-700">{row.label}</td>
+                  <td className="px-4 py-3.5 text-center text-gray-600">{row.comp}</td>
+                  <td className="px-4 py-3.5 text-center font-semibold text-gray-800">{row.hp}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
+
+      {/* ─── ECONÓMICO ─── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="bg-white rounded-2xl border border-gray-200 p-6"
+      >
+        <h3 className="font-black text-gray-900 mb-5">Resumen Económico</h3>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="border-l-4 border-rose-400 pl-5">
+            <p className="text-xs text-gray-400 uppercase font-bold mb-1">Coste Mensual (Solvente)</p>
+            <p className="text-2xl font-black text-gray-900">{formatCurrency(results.currentMonthlyCost)}</p>
+            <p className="text-xs text-gray-500 mt-1">Con esperas incluidas</p>
+          </div>
+          <div className="border-l-4 border-sky-400 pl-5">
+            <p className="text-xs text-gray-400 uppercase font-bold mb-1">Coste Mensual (HP Latex)</p>
+            <p className="text-2xl font-black text-gray-900">{formatCurrency(results.hpMonthlyCost)}</p>
+            <p className="text-xs text-gray-500 mt-1">Sin tiempos de espera</p>
+          </div>
+          <div className="border-l-4 border-emerald-400 pl-5">
+            <p className="text-xs text-gray-400 uppercase font-bold mb-1">Ahorro Mensual</p>
+            <p className="text-2xl font-black text-emerald-600">{formatCurrency(results.monthlySavings || 0)}</p>
+            <p className="text-xs text-emerald-600 mt-1">ROI en {results.roiMonths?.toFixed(1) || '—'} meses</p>
+          </div>
+        </div>
+      </motion.div>
+
     </div>
   );
 };

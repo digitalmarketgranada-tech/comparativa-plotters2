@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { useData } from '../context/DataContext';
-import { Download } from 'lucide-react';
+import { useData, COMPETITOR_MACHINES } from '../context/DataContext';
+import { Download, Printer, TrendingUp, Euro, Clock, Leaf, Monitor, BarChart3, CheckCircle, AlertTriangle } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -9,250 +9,330 @@ const Report: React.FC = () => {
   const [downloading, setDownloading] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
 
-  const formatCurrency = (val: number) =>
+  const fc = (val: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
+  const fc2 = (val: number) =>
+    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+
+  const competitorMachine = COMPETITOR_MACHINES.find(m => m.model === data.currentMachineModel);
+  const solventSaving = results.currentMonthlyCost - results.hpMonthlyCost;
+  const rentingCoversRatio = solventSaving / results.monthlyRentingQuota;
+  const roiOk = results.hpNetMonthlyProfit >= results.currentMonthlyProfit;
 
   const handleDownloadPdf = async () => {
     setDownloading(true);
     if (!reportRef.current) return;
-
     try {
       const canvas = await html2canvas(reportRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
+        scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff',
       });
-
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
       const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
       const ratio = Math.min(210 / imgWidth, 297 / imgHeight);
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth * ratio, imgHeight * ratio);
-
-      pdf.save(`Informe_ROI_DigitalMarket_${new Date().toISOString().slice(0, 10)}.pdf`);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert("Error al generar el PDF. Por favor, usa la opción 'Imprimir' del navegador como alternativa.");
+      pdf.save(`Informe_ROI_DM_${new Date().toISOString().slice(0, 10)}.pdf`);
+    } catch (e) {
+      console.error(e);
     } finally {
       setDownloading(false);
     }
   };
 
-  // Paleta de colores HEX garantizada para html2canvas
-  const colors = {
-    white: '#ffffff',
-    black: '#000000',
-    gray50: '#f9fafb',
-    gray100: '#f3f4f6',
-    gray200: '#e5e7eb',
-    gray400: '#9ca3af',
-    gray500: '#6b7280',
-    gray800: '#1f2937',
-    gray900: '#111827',
-    sky50: '#f0f9ff',
-    sky100: '#e0f2fe',
-    sky600: '#0284c7',
-    sky900: '#0c4a6e',
-    emerald50: '#ecfdf5',
-    emerald100: '#d1fae5',
-    emerald500: '#10b981',
-    emerald600: '#059669',
-    amber50: '#fffbeb',
-    amber100: '#fef3c7',
-    amber600: '#d97706',
-    rose50: '#fff1f2',
-    rose100: '#ffe4e6',
-    rose600: '#e11d48',
-  };
-
-  // Estilos base para evitar Tailwind v4 oklch
-  const s = {
-    container: { fontFamily: 'Arial, sans-serif', width: '210mm', minHeight: '297mm', padding: '15mm', backgroundColor: colors.white, margin: '0 auto', position: 'relative' as const, boxSizing: 'border-box' as const, color: colors.gray900 },
-    topBar: { position: 'absolute' as const, top: 0, left: 0, right: 0, height: '6px', backgroundColor: colors.sky600 },
-    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '20px', borderBottom: `1px solid ${colors.gray100}` },
-    logoBox: { width: '45px', height: '45px', backgroundColor: colors.sky600, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.white, fontWeight: '900', fontSize: '20px' },
-    kpiGrid: { display: 'flex', gap: '15px', marginBottom: '30px' },
-    kpiCard: { flex: 1, padding: '20px', borderRadius: '12px', border: '1px solid', textAlign: 'center' as const },
-    compGrid: { display: 'flex', gap: '25px', marginBottom: '30px' },
-    compCol: { flex: 1, borderRadius: '12px', border: '1px solid', overflow: 'hidden' },
-    compHeader: { padding: '10px 15px', borderBottom: '1px solid', color: colors.white, fontWeight: 'bold', fontSize: '11px', textTransform: 'uppercase' as const, letterSpacing: '1px' },
-    compBody: { padding: '18px', fontSize: '12px' },
-    profitBox: { backgroundColor: colors.gray900, borderRadius: '16px', padding: '25px', color: colors.white, marginBottom: '30px', position: 'relative' as const, overflow: 'hidden' },
-    benefitRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' },
-    tag: { fontSize: '8px', fontWeight: 'bold', textTransform: 'uppercase' as const, padding: '3px 8px', borderRadius: '4px', display: 'inline-block', marginBottom: '5px' },
-    footer: { position: 'absolute' as const, bottom: '15mm', left: '15mm', right: '15mm', borderTop: `1px solid ${colors.gray100}`, paddingTop: '15px', display: 'flex', justifyContent: 'space-between', opacity: 0.6, fontSize: '9px' }
-  };
-
   return (
-    <div className="bg-gray-100 min-h-screen py-10 px-4">
-      <div className="max-w-4xl mx-auto mb-6 flex justify-between items-center no-print">
-        <h1 className="text-xl font-bold text-gray-800">Previsualización de Informe Final</h1>
+    <div className="space-y-6" style={{ fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}>
+
+      {/* Toolbar */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900">Informe Final</h1>
+          <p className="text-gray-400 text-sm mt-0.5">Generado el {new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+        </div>
         <button
           onClick={handleDownloadPdf}
-          className="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-emerald-700 shadow-lg flex items-center gap-2 transition-all"
           disabled={downloading}
+          className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-700 transition-colors shadow-sm"
         >
-          <Download size={18} />
-          {downloading ? 'Procesando...' : 'Descargar PDF (1 Pág)'}
+          <Download size={16} />
+          {downloading ? 'Generando...' : 'Descargar PDF'}
         </button>
       </div>
 
-      {/* REPORTE FISICO (A4) - SIN TAILWIND INTERNO */}
-      <div ref={reportRef} style={s.container}>
-        <div style={s.topBar}></div>
+      {/* ══════════════ CONTENIDO DEL INFORME ══════════════ */}
+      <div ref={reportRef} className="space-y-6 bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
 
-        {/* Encabezado */}
-        <div style={s.header}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <div style={s.logoBox}>HP</div>
+        {/* CABECERA */}
+        <div className="flex items-start justify-between pb-6 border-b-2 border-gray-900">
+          <div className="flex items-center gap-4">
+            <img src="/assets/logo-dm.png" alt="Digital Market" className="h-12 w-auto" />
             <div>
-              <div style={{ fontSize: '18px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-0.5px' }}>Informe de Viabilidad ROI</div>
-              <div style={{ fontSize: '10px', fontWeight: 'bold', color: colors.sky600, textTransform: 'uppercase', letterSpacing: '1px' }}>HP Latex Print & Cut Solutions</div>
+              <h2 className="text-xl font-black text-gray-900 leading-tight">Informe de Viabilidad ROI</h2>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">HP Latex Print & Cut — Análisis Comparativo</p>
             </div>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '9px', fontWeight: 'bold', color: colors.gray400, textTransform: 'uppercase' }}>Analizado por</div>
-            <div style={{ fontSize: '13px', fontWeight: 'bold' }}>Digital Market</div>
-            <div style={{ fontSize: '9px', color: colors.gray500 }}>{new Date().toLocaleDateString('es-ES')}</div>
+          <div className="text-right text-xs text-gray-400">
+            <p className="font-bold text-gray-600 text-sm">Digital Market</p>
+            <p>Partner Especialista HP</p>
+            <p className="mt-1">{new Date().toLocaleDateString('es-ES')}</p>
           </div>
         </div>
 
-        {/* KPI Row */}
-        <div style={s.kpiGrid}>
-          <div style={{ ...s.kpiCard, backgroundColor: colors.sky50, borderColor: colors.sky100 }}>
-            <div style={{ fontSize: '9px', fontWeight: 'bold', color: colors.sky600, textTransform: 'uppercase', marginBottom: '8px' }}>Ahorro Anual</div>
-            <div style={{ fontSize: '28px', fontWeight: '900', color: colors.sky900 }}>{formatCurrency(results.annualSavings)}</div>
-            <div style={{ ...s.tag, backgroundColor: colors.emerald100, color: colors.emerald600, marginTop: '8px' }}>Margen Optimizado</div>
-          </div>
-          <div style={{ ...s.kpiCard, backgroundColor: colors.emerald50, borderColor: colors.emerald100 }}>
-            <div style={{ fontSize: '9px', fontWeight: 'bold', color: colors.emerald600, textTransform: 'uppercase', marginBottom: '8px' }}>Retorno (ROI)</div>
-            <div style={{ fontSize: '28px', fontWeight: '900' }}>{results.roiMonths.toFixed(1)} <span style={{ fontSize: '14px' }}>Meses</span></div>
-            <div style={{ ...s.tag, backgroundColor: colors.sky100, color: colors.sky600, marginTop: '8px' }}>Inversión Segura</div>
-          </div>
-          <div style={{ ...s.kpiCard, backgroundColor: colors.amber50, borderColor: colors.amber100 }}>
-            <div style={{ fontSize: '9px', fontWeight: 'bold', color: colors.amber600, textTransform: 'uppercase', marginBottom: '8px' }}>Productividad</div>
-            <div style={{ fontSize: '28px', fontWeight: '900' }}>10x <span style={{ fontSize: '14px' }}>Rápido</span></div>
-            <div style={{ ...s.tag, backgroundColor: colors.amber100, color: colors.amber600, marginTop: '8px' }}>Sin Esperas</div>
+        {/* ── SECCIÓN 1: KPIs CLAVE ── */}
+        <div>
+          <SectionTitle icon={TrendingUp} label="Resultados Clave" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+            <KpiCard label="Ahorro Anual" value={fc(results.annualSavings)} sub="operativo + tiempo" color="emerald" />
+            <KpiCard label="Ahorro Mensual" value={fc(results.monthlySavings)} sub="vs situación actual" color="sky" />
+            <KpiCard label="ROI — Retorno" value={`${results.roiMonths.toFixed(1)} meses`} sub="amortización inversión" color="violet" />
+            <KpiCard label="Tiempo Liberado" value={`${Math.round(results.productionTimeSavings * 12)}h/año`} sub="sin esperas de desgasif." color="amber" />
           </div>
         </div>
 
-        {/* Comparativa Detallada */}
-        <div style={s.compGrid}>
-          {/* Competencia */}
-          <div style={{ ...s.compCol, borderColor: colors.rose100 }}>
-            <div style={{ ...s.compHeader, backgroundColor: colors.rose600 }}>Tecnología Actual (Solvente)</div>
-            <div style={s.compBody}>
-              <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: colors.gray500 }}>Tinta Mensual:</span>
-                <span style={{ fontWeight: 'bold' }}>{formatCurrency((0.012 * data.inkPrice) * data.monthlyVolume)}</span>
+        {/* ── SECCIÓN 2: DATOS DEL ANÁLISIS ── */}
+        <div>
+          <SectionTitle icon={Monitor} label="Datos Introducidos en el Análisis" />
+          <div className="grid md:grid-cols-2 gap-4 mt-3">
+            {/* Situación actual */}
+            <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+              <div className="bg-rose-600 text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider">Máquina Actual — Solvente</div>
+              <div className="p-4 space-y-2">
+                <DataRow label="Modelo" value={data.currentMachineModel} />
+                <DataRow label="Volumen mensual" value={`${data.monthlyVolume} m²/mes`} />
+                <DataRow label="Velocidad impresión" value={`${data.printSpeed} m²/h`} />
+                <DataRow label="Precio tinta" value={`${fc2(data.inkPrice)}/L`} />
+                <DataRow label="Mantenimiento semanal" value={`${data.maintenanceHours}h/semana`} />
+                <DataRow label="Espera desgasificación" value={`${data.waitHours}h`} highlight="rose" />
+                {competitorMachine && (
+                  <DataRow label="Consumo tinta" value={`${(competitorMachine.inkConsumption * 1000).toFixed(0)} ml/m²`} />
+                )}
               </div>
-              <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: colors.gray500 }}>Mano de Obra + Mant:</span>
-                <span style={{ fontWeight: 'bold' }}>{formatCurrency(((data.monthlyVolume / data.printSpeed) + (data.maintenanceHours * 4)) * 20)}</span>
-              </div>
-              <div style={{ marginBottom: '15px', display: 'flex', justifyContent: 'space-between', color: colors.rose600, fontWeight: 'bold' }}>
-                <span>Pérdida por Esperas:</span>
-                <span>{formatCurrency((data.monthlyVolume / 50) * 0.5 * 20)}</span>
-              </div>
-              <div style={{ paddingTop: '12px', borderTop: `1px solid ${colors.rose100}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '10px', fontWeight: 'bold', color: colors.rose600, textTransform: 'uppercase' }}>Total Operativo</span>
-                <span style={{ fontSize: '18px', fontWeight: '900', color: colors.rose600 }}>{formatCurrency(results.currentMonthlyCost)}</span>
+            </div>
+            {/* Solución HP */}
+            <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+              <div className="bg-sky-600 text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider">Solución HP Latex</div>
+              <div className="p-4 space-y-2">
+                <DataRow label="Modelo HP" value={data.hpMachineModel} />
+                <DataRow label="Velocidad HP (4 pasadas)" value={`${data.hpPrintSpeed} m²/h`} highlight="sky" />
+                <DataRow label="Precio máquina" value={fc(data.hpMachinePrice)} />
+                <DataRow label="Tinta HP (cartuchos 1L)" value={`${fc2(data.hpCartridgePrice)}/cartucho`} />
+                <DataRow label="Coste tinta HP" value="1,20 €/m² (estándar)" />
+                <DataRow label="Espera desgasificación" value="0h — curado instantáneo" highlight="emerald" />
+                <DataRow label="Mantenimiento" value="0h/semana" highlight="emerald" />
               </div>
             </div>
           </div>
 
-          {/* HP */}
-          <div style={{ ...s.compCol, borderColor: colors.emerald500, borderWidth: '2px' }}>
-            <div style={{ ...s.compHeader, backgroundColor: colors.emerald600 }}>Solución HP Latex + Summa</div>
-            <div style={s.compBody}>
-              <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: colors.gray500 }}>Tinta Mensual:</span>
-                <span style={{ fontWeight: 'bold' }}>{formatCurrency(1.2 * data.monthlyVolume)}</span>
-              </div>
-              <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: colors.gray500 }}>Carga Operario (Eficiente):</span>
-                <span style={{ fontWeight: 'bold' }}>{formatCurrency((data.monthlyVolume / data.hpPrintSpeed) * 20)}</span>
-              </div>
-              <div style={{ marginBottom: '15px', color: colors.emerald600, fontWeight: 'bold', fontSize: '10px', textTransform: 'uppercase' }}>
-                ✓ 0€ en Esperas y Mantenimiento
-              </div>
-              <div style={{ paddingTop: '12px', borderTop: `1px solid ${colors.emerald100}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '10px', fontWeight: 'bold', color: colors.emerald600, textTransform: 'uppercase' }}>Total Operativo HP</span>
-                <span style={{ fontSize: '18px', fontWeight: '900', color: colors.emerald600 }}>{formatCurrency(results.hpMonthlyCost)}</span>
-              </div>
+          {/* Productos */}
+          <div className="mt-3 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+            <div className="bg-gray-700 text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider">Mix de Producción</div>
+            <div className="p-4 grid md:grid-cols-4 gap-4">
+              <DataRow label="Lona %" value={`${data.lonaPercentage}%`} />
+              <DataRow label="Precio venta lona" value={`${fc2(data.lonaSellPrice)}/m²`} />
+              <DataRow label="Vinilo %" value={`${data.viniloPercentage}%`} />
+              <DataRow label="Precio venta vinilo" value={`${fc2(data.viniloSellPrice)}/m²`} />
             </div>
           </div>
         </div>
 
-        {/* Financial Flow */}
-        <div style={s.profitBox}>
-          <div style={s.benefitRow}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '9px', fontWeight: 'bold', color: '#0ea5e9', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '18px' }}>Análisis de Flujo de Caja</div>
-              <div style={{ display: 'flex', gap: '30px' }}>
-                <div>
-                  <div style={{ fontSize: '9px', color: colors.gray500, fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>Ventas Est.</div>
-                  <div style={{ fontSize: '22px', fontWeight: '900' }}>{formatCurrency(results.monthlyRevenue)}</div>
+        {/* ── SECCIÓN 3: COMPARATIVA ECONÓMICA ── */}
+        <div>
+          <SectionTitle icon={Euro} label="Comparativa Económica Mensual" />
+          <div className="mt-3 rounded-xl border border-gray-200 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-100 border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase w-1/2">Concepto</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-rose-500 uppercase">Solvente Actual</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-sky-600 uppercase">HP Latex</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-emerald-600 uppercase">Diferencia</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                <tr className="bg-white">
+                  <td className="px-4 py-3 text-gray-700 font-medium">Ventas estimadas</td>
+                  <td className="px-4 py-3 text-right text-gray-900 font-bold">{fc(results.monthlyRevenue)}</td>
+                  <td className="px-4 py-3 text-right text-gray-900 font-bold">{fc(results.monthlyRevenue)}</td>
+                  <td className="px-4 py-3 text-right text-gray-400">—</td>
+                </tr>
+                <tr className="bg-gray-50/50">
+                  <td className="px-4 py-3 text-gray-700 font-medium">Costes operativos (tinta + mano obra + esperas)</td>
+                  <td className="px-4 py-3 text-right text-rose-600 font-bold">−{fc(results.currentMonthlyCost)}</td>
+                  <td className="px-4 py-3 text-right text-emerald-600 font-bold">−{fc(results.hpMonthlyCost)}</td>
+                  <td className="px-4 py-3 text-right text-emerald-600 font-bold">+{fc(solventSaving)}</td>
+                </tr>
+                <tr className="bg-white">
+                  <td className="px-4 py-3 text-gray-700 font-medium">Beneficio bruto</td>
+                  <td className="px-4 py-3 text-right font-bold text-gray-900">{fc(results.currentMonthlyProfit)}</td>
+                  <td className="px-4 py-3 text-right font-bold text-gray-900">{fc(results.hpMonthlyProfit)}</td>
+                  <td className="px-4 py-3 text-right text-emerald-600 font-bold">+{fc(results.hpMonthlyProfit - results.currentMonthlyProfit)}</td>
+                </tr>
+                <tr className="bg-amber-50/60">
+                  <td className="px-4 py-3 text-gray-700 font-medium">Cuota renting HP ({data.rentingMonths}m · {data.rentingInterest}%)</td>
+                  <td className="px-4 py-3 text-right text-gray-400">No aplica</td>
+                  <td className="px-4 py-3 text-right text-amber-600 font-bold">−{fc(results.monthlyRentingQuota)}</td>
+                  <td className="px-4 py-3 text-right text-gray-400">Inversión</td>
+                </tr>
+                <tr className={`border-t-2 border-gray-200 ${roiOk ? 'bg-emerald-50' : 'bg-sky-50'}`}>
+                  <td className="px-4 py-3 font-black text-gray-900">Beneficio neto final</td>
+                  <td className="px-4 py-3 text-right font-black text-gray-900">{fc(results.currentMonthlyProfit)}</td>
+                  <td className={`px-4 py-3 text-right font-black text-xl ${roiOk ? 'text-emerald-600' : 'text-sky-600'}`}>{fc(results.hpNetMonthlyProfit)}</td>
+                  <td className={`px-4 py-3 text-right font-black ${roiOk ? 'text-emerald-600' : 'text-sky-500'}`}>
+                    {roiOk ? '+' : ''}{fc(results.hpNetMonthlyProfit - results.currentMonthlyProfit)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Nota sobre el ROI */}
+          <div className={`mt-3 rounded-xl p-4 flex gap-3 ${roiOk ? 'bg-emerald-50 border border-emerald-200' : 'bg-sky-50 border border-sky-200'}`}>
+            {roiOk ? <CheckCircle className="text-emerald-600 flex-shrink-0 mt-0.5" size={18} /> : <AlertTriangle className="text-sky-600 flex-shrink-0 mt-0.5" size={18} />}
+            <p className="text-sm text-gray-700 leading-relaxed">
+              {roiOk
+                ? <><strong>La máquina se amortiza sola:</strong> el ahorro operativo ({fc(solventSaving)}/mes) cubre la cuota de renting ({fc(results.monthlyRentingQuota)}/mes) con un excedente de <strong className="text-emerald-600">{fc(results.hpNetMonthlyProfit - results.currentMonthlyProfit)}/mes</strong>.</>
+                : <><strong>El ahorro operativo ({fc(solventSaving)}/mes)</strong> no cubre íntegramente la cuota de renting ({fc(results.monthlyRentingQuota)}/mes). La diferencia de {fc(results.monthlyRentingQuota - solventSaving)}/mes se compensa con <strong>mayor capacidad productiva diaria</strong> (sin esperas de 24-48h) y la posibilidad de aceptar más pedidos al día.</>
+              }
+            </p>
+          </div>
+        </div>
+
+        {/* ── SECCIÓN 4: FLUJO DE TRABAJO ── */}
+        <div>
+          <SectionTitle icon={Clock} label="Ventaja en Flujo de Trabajo" />
+          <div className="mt-3 grid md:grid-cols-2 gap-4">
+            <div className="border border-rose-100 rounded-xl overflow-hidden">
+              <div className="bg-rose-50 px-4 py-2.5 text-xs font-black text-rose-700 uppercase">Proceso Actual (Solvente)</div>
+              <div className="p-4 space-y-2 text-sm">
+                <FlowStep num={1} label="Impresión" detail={`~${(data.monthlyVolume / (data.printSpeed * 168)).toFixed(0)}h producción mensual a ${data.printSpeed} m²/h`} bad />
+                <FlowStep num={2} label={`Desgasificación — esperar ${data.waitHours}h`} detail="Plotter de corte bloqueado" bad />
+                <FlowStep num={3} label="Laminado (si aplica)" detail="Solo posible tras desgasificación completa" bad />
+                <FlowStep num={4} label="Corte" detail="Solo cuando ha terminado todo lo anterior" bad />
+                <div className="mt-3 bg-rose-50 rounded-lg p-3 border border-rose-200">
+                  <p className="text-xs font-bold text-rose-700">Tiempo total hasta entrega: 26-52h mínimo con laminado</p>
                 </div>
-                <div>
-                  <div style={{ fontSize: '9px', color: '#fbbf24', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>Renting (60m)</div>
-                  <div style={{ fontSize: '22px', fontWeight: '900', color: '#fbbf24' }}>-{formatCurrency(results.monthlyRentingQuota)}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '10px', color: colors.emerald500, fontWeight: '900', textTransform: 'uppercase', marginBottom: '4px' }}>Beneficio Neto</div>
-                  <div style={{ fontSize: '38px', fontWeight: '900', color: colors.emerald500, lineHeight: '1' }}>{formatCurrency(results.hpNetMonthlyProfit)}</div>
-                </div>
               </div>
             </div>
-            <div style={{ textAlign: 'right', paddingLeft: '25px', borderLeft: '1px solid #374151' }}>
-              <div style={{ backgroundColor: colors.emerald500, padding: '5px 12px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', marginBottom: '8px' }}>
-                Ganas {formatCurrency(results.hpNetMonthlyProfit - results.currentMonthlyProfit)} más/mes
-              </div>
-              <div style={{ fontSize: '9px', color: colors.gray500, fontWeight: 'bold', lineHeight: '1.4' }}>
-                El ahorro paga la cuota.<br />La máquina te sale gratis.
+            <div className="border-2 border-sky-300 rounded-xl overflow-hidden">
+              <div className="bg-sky-600 text-white px-4 py-2.5 text-xs font-black uppercase">Proceso HP Latex (sin esperas)</div>
+              <div className="p-4 space-y-2 text-sm">
+                <FlowStep num={1} label="Impresión HP Latex" detail={`${data.hpPrintSpeed} m²/h — curado instantáneo en máquina`} ok />
+                <FlowStep num={2} label="Plotter libre durante impresión" detail="Puede cortar otro pedido mientras se imprime" ok />
+                <FlowStep num={3} label="Laminado (si aplica)" detail="Posible 1 min después de salir de impresora" ok />
+                <FlowStep num={4} label="Corte inmediato" detail="Sin esperar desgasificación" ok />
+                <div className="mt-3 bg-emerald-50 rounded-lg p-3 border border-emerald-200">
+                  <p className="text-xs font-bold text-emerald-700">Tiempo total hasta entrega: 2-5h mismo día</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Benefits & Notes */}
-        <div style={{ display: 'flex', gap: '40px', marginBottom: '30px' }}>
-          <div style={{ flex: 1.2 }}>
-            <div style={{ fontSize: '11px', fontWeight: 'bold', borderBottom: `2px solid ${colors.sky600}`, paddingBottom: '6px', marginBottom: '12px', textTransform: 'uppercase' }}>Valor Añadido HP Latex</div>
-            <div style={{ fontSize: '10px', lineHeight: '1.8', fontWeight: 'bold' }}>
-              • Secado instantáneo: Trabajos listos para entregar en el acto.<br />
-              • Summa Technology: Impresión y corte sincronizados.<br />
-              • Certificación Ecológica: Sin olores, apto para interiores delicados.<br />
-              • Fiabilidad: Cabezales sustituibles por el usuario en minutos.
-            </div>
+        {/* ── SECCIÓN 5: SOFTWARE HP PrintOS ── */}
+        <div>
+          <SectionTitle icon={BarChart3} label="HP PrintOS — Software Exclusivo en Nube" />
+          <div className="mt-3 grid md:grid-cols-2 gap-3">
+            {[
+              { t: 'PrintOS Live — Monitorización Remota', d: 'Controla estado de la impresora, cola y tinta en tiempo real desde cualquier dispositivo.' },
+              { t: 'Print Beat — Analíticas de Producción', d: 'Datos históricos y en tiempo real sobre rendimiento, consumo de tinta y KPIs de productividad.' },
+              { t: 'PrintOS Box — Recepción Automatizada', d: 'Tus clientes envían archivos directamente; validación automática, preflight y enrutamiento a producción.' },
+              { t: 'API Abierta — Sin Coste Adicional', d: 'Integración con MIS, ERP o web-to-print. Actualizaciones automáticas gestionadas por HP.' },
+            ].map(({ t, d }, i) => (
+              <div key={i} className="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                <p className="text-xs font-black text-sky-700 mb-1">{t}</p>
+                <p className="text-xs text-gray-500 leading-relaxed">{d}</p>
+              </div>
+            ))}
           </div>
-          <div style={{ flex: 1, backgroundColor: colors.amber50, padding: '18px', borderRadius: '12px', border: `1px solid ${colors.amber100}` }}>
-            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#92400e', marginBottom: '8px', textTransform: 'uppercase' }}>Coste de Oportunidad</div>
-            <div style={{ fontSize: '10px', color: '#b45309', fontWeight: 'bold', lineHeight: '1.5' }}>
-              Mantener el sistema actual te cuesta 4600€ al año en ineficiencias y te obliga a esperar 24h para terminar cada pedido. Con HP Latex, ese tiempo es facturación neta.
-            </div>
+          <p className="text-xs text-gray-400 mt-2 italic">* Roland, Mimaki y Epson no ofrecen un ecosistema cloud equivalente de forma gratuita integrada.</p>
+        </div>
+
+        {/* ── SECCIÓN 6: SOSTENIBILIDAD ── */}
+        <div>
+          <SectionTitle icon={Leaf} label="Sostenibilidad y Certificaciones" />
+          <div className="mt-3 grid md:grid-cols-3 gap-3">
+            {[
+              { badge: 'GREENGUARD Gold', desc: 'Certificado UL. Apto para instalación en escuelas, hospitales e interiores sensibles.' },
+              { badge: 'UL ECOLOGO', desc: 'Sin COVs, sin olores. Tinta base agua 65%. No requiere ventilación forzada.' },
+              { badge: 'Energy Star', desc: 'Menor consumo energético certificado. Sin residuos tóxicos — cartuchos reciclables HP.' },
+            ].map(({ badge, desc }, i) => (
+              <div key={i} className="bg-emerald-50 rounded-xl border border-emerald-200 p-4">
+                <span className="inline-block text-[10px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded mb-2 uppercase">{badge}</span>
+                <p className="text-xs text-gray-600 leading-relaxed">{desc}</p>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Footer */}
-        <div style={s.footer}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: colors.sky600 }}></div>
-            <div style={{ fontWeight: 'bold' }}>Digital Market • Partner Especialista HP Latex</div>
+        {/* ── SECCIÓN 7: RENTING ── */}
+        <div>
+          <SectionTitle icon={Euro} label="Condiciones de Financiación (Renting)" />
+          <div className="mt-3 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+            <table className="w-full text-sm">
+              <tbody className="divide-y divide-gray-100">
+                <tr><td className="px-4 py-2.5 text-gray-500">Precio máquina HP</td><td className="px-4 py-2.5 font-bold text-gray-900 text-right">{fc(data.hpMachinePrice)}</td></tr>
+                <tr><td className="px-4 py-2.5 text-gray-500">Duración del renting</td><td className="px-4 py-2.5 font-bold text-gray-900 text-right">{data.rentingMonths} meses ({data.rentingMonths / 12} años)</td></tr>
+                <tr><td className="px-4 py-2.5 text-gray-500">Tipo de interés anual</td><td className="px-4 py-2.5 font-bold text-gray-900 text-right">{data.rentingInterest}%</td></tr>
+                <tr className="bg-amber-50"><td className="px-4 py-2.5 font-bold text-gray-700">Cuota mensual renting</td><td className="px-4 py-2.5 font-black text-amber-600 text-right text-lg">{fc(results.monthlyRentingQuota)}</td></tr>
+                <tr><td className="px-4 py-2.5 text-gray-500">Ahorro operativo mensual HP vs Solvente</td><td className="px-4 py-2.5 font-bold text-emerald-600 text-right">{fc(solventSaving)}</td></tr>
+                <tr className="bg-gray-100"><td className="px-4 py-2.5 font-bold text-gray-700">El ahorro cubre el {Math.min(100, Math.round(rentingCoversRatio * 100))}% de la cuota</td><td className="px-4 py-2.5 font-black text-right">{fc(results.monthlyRentingQuota * Math.min(1, rentingCoversRatio))} / {fc(results.monthlyRentingQuota)}</td></tr>
+              </tbody>
+            </table>
           </div>
-          <div style={{ fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px' }}>Soluciones HP 2024</div>
         </div>
+
+        {/* FOOTER */}
+        <div className="pt-4 border-t border-gray-200 flex justify-between items-center text-xs text-gray-400">
+          <p>Digital Market · Partner Especialista HP Latex · <span className="font-bold">digital-market.es</span></p>
+          <p>Informe generado automáticamente por Calculadora DM</p>
+        </div>
+
       </div>
     </div>
   );
 };
+
+/* Componentes auxiliares */
+
+const SectionTitle: React.FC<{ icon: React.ElementType; label: string }> = ({ icon: Icon, label }) => (
+  <div className="flex items-center gap-2 mb-1">
+    <div className="w-6 h-6 bg-gray-900 rounded-md flex items-center justify-center flex-shrink-0">
+      <Icon size={13} className="text-white" />
+    </div>
+    <h3 className="font-black text-gray-900 text-base">{label}</h3>
+  </div>
+);
+
+const KpiCard: React.FC<{ label: string; value: string; sub: string; color: string }> = ({ label, value, sub, color }) => {
+  const bg: Record<string, string> = { emerald: 'bg-emerald-50 border-emerald-200', sky: 'bg-sky-50 border-sky-200', violet: 'bg-violet-50 border-violet-200', amber: 'bg-amber-50 border-amber-200' };
+  const text: Record<string, string> = { emerald: 'text-emerald-700', sky: 'text-sky-700', violet: 'text-violet-700', amber: 'text-amber-700' };
+  return (
+    <div className={`rounded-xl border p-4 ${bg[color]}`}>
+      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{label}</p>
+      <p className={`text-2xl font-black leading-tight ${text[color]}`}>{value}</p>
+      <p className="text-[10px] text-gray-400 mt-1">{sub}</p>
+    </div>
+  );
+};
+
+const DataRow: React.FC<{ label: string; value: string; highlight?: string }> = ({ label, value, highlight }) => {
+  const color = highlight === 'rose' ? 'text-rose-600 font-bold' : highlight === 'emerald' ? 'text-emerald-600 font-bold' : highlight === 'sky' ? 'text-sky-600 font-bold' : 'text-gray-900 font-medium';
+  return (
+    <div className="flex justify-between items-baseline gap-2">
+      <span className="text-xs text-gray-500 flex-shrink-0">{label}</span>
+      <span className={`text-xs text-right ${color}`}>{value}</span>
+    </div>
+  );
+};
+
+const FlowStep: React.FC<{ num: number; label: string; detail: string; ok?: boolean; bad?: boolean }> = ({ num, label, detail, ok, bad }) => (
+  <div className="flex items-start gap-3">
+    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5 ${ok ? 'bg-emerald-500 text-white' : bad ? 'bg-rose-400 text-white' : 'bg-gray-200 text-gray-500'}`}>{num}</div>
+    <div>
+      <p className={`text-xs font-bold leading-tight ${ok ? 'text-emerald-700' : bad ? 'text-rose-700' : 'text-gray-700'}`}>{label}</p>
+      <p className="text-[10px] text-gray-400 mt-0.5">{detail}</p>
+    </div>
+  </div>
+);
 
 export default Report;

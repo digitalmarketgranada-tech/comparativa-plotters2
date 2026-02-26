@@ -71,25 +71,32 @@ const CostBreakdown: React.FC = () => {
             <h3 className="font-bold text-rose-900 text-lg uppercase tracking-tight">Tu Situación Actual</h3>
             <span className="text-rose-600 font-mono text-xs font-bold px-2 py-1 bg-rose-100 rounded">SOLVENTE</span>
           </div>
-          <div className="p-8 space-y-6">
-            <div className="flex justify-between items-end border-b border-gray-100 pb-4">
-              <span className="text-gray-500 font-medium">Ventas Mensuales</span>
-              <span className="text-2xl font-bold text-gray-900">{formatCurrency(results.monthlyRevenue)}</span>
+          <div className="p-6 space-y-0">
+            {/* Fila 1 */}
+            <div className="flex justify-between items-center py-4 border-b border-gray-100">
+              <span className="text-gray-500 font-medium text-sm">Ventas Mensuales</span>
+              <span className="text-xl font-bold text-gray-900">{formatCurrency(results.monthlyRevenue)}</span>
             </div>
-            <div className="flex justify-between items-end border-b border-gray-100 pb-4">
-              <div>
-                <span className="text-gray-500 font-medium">Costes Operativos</span>
-                <p className="text-[10px] text-rose-500 font-bold uppercase">Tinta + Mano de Obra + Esperas</p>
-              </div>
-              <span className="text-xl font-bold text-rose-600">-{formatCurrency(results.currentMonthlyCost)}</span>
-            </div>
-            <div className="pt-2">
-              <div className="bg-gradient-to-br from-rose-50 to-white p-6 rounded-xl border border-rose-200 shadow-inner">
-                <p className="text-rose-800 text-xs font-bold uppercase mb-1 tracking-wider">Beneficio Bruto Mensual</p>
-                <div className="flex items-baseline gap-2">
-                  <h2 className="text-4xl font-black text-rose-600">{formatCurrency(results.currentMonthlyProfit)}</h2>
-                  <span className="text-rose-400 font-bold text-sm">Limpio</span>
+            {/* Fila 2 */}
+            <div className="py-4 border-b border-gray-100">
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-gray-500 font-medium text-sm">Costes Operativos</span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    <span className="text-[10px] bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded font-bold">Tinta</span>
+                    <span className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded font-bold">Mano de obra</span>
+                    <span className="text-[10px] bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded font-bold">Esperas</span>
+                  </div>
                 </div>
+                <span className="text-xl font-bold text-rose-500">−{formatCurrency(results.currentMonthlyCost)}</span>
+              </div>
+            </div>
+            {/* Resultado */}
+            <div className="pt-5">
+              <div className="rounded-xl bg-rose-50 border border-rose-200 p-5">
+                <p className="text-xs font-bold text-rose-400 uppercase tracking-widest mb-1">Beneficio Bruto Mensual</p>
+                <p className="text-4xl font-black text-rose-600">{formatCurrency(results.currentMonthlyProfit)}</p>
+                <p className="text-xs text-rose-400 mt-2">Sin contar inversión en nuevo equipo</p>
               </div>
             </div>
           </div>
@@ -99,53 +106,113 @@ const CostBreakdown: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white rounded-2xl border-2 border-sky-500 shadow-xl overflow-hidden relative"
+          className="bg-white rounded-2xl border-2 border-sky-400 shadow-xl overflow-hidden relative"
         >
           <div className="bg-sky-600 px-6 py-4 border-b border-sky-700 flex items-center justify-between text-white">
             <h3 className="font-bold text-lg uppercase tracking-tight">Solución HP Latex</h3>
             <span className="bg-emerald-400 text-sky-900 font-black text-[10px] px-3 py-1 rounded-full shadow-sm">RECOMENDADO</span>
           </div>
-          <div className="p-8 space-y-4">
-            <div className="flex justify-between items-end border-b border-gray-100 pb-3">
-              <span className="text-gray-500 font-medium">Ventas Mensuales</span>
-              <span className="text-2xl font-bold text-gray-900">{formatCurrency(results.monthlyRevenue)}</span>
+          <div className="p-6 space-y-0">
+            {/* Fila 1 */}
+            <div className="flex justify-between items-center py-4 border-b border-gray-100">
+              <span className="text-gray-500 font-medium text-sm">Ventas Mensuales</span>
+              <span className="text-xl font-bold text-gray-900">{formatCurrency(results.monthlyRevenue)}</span>
             </div>
-            <div className="flex justify-between items-end border-b border-gray-100 pb-3">
-              <div>
-                <span className="text-gray-500 font-medium">Nuevos Costes Operativos</span>
-                <p className="text-[10px] text-emerald-600 font-bold uppercase">Ahorro en Operario y Esperas</p>
-              </div>
-              <span className="text-xl font-bold text-emerald-600">-{formatCurrency(results.hpMonthlyCost)}</span>
-            </div>
-            <div className="flex justify-between items-end border-b border-gray-100 pb-3 bg-gray-50 -mx-8 px-8 py-3">
-              <div>
-                <span className="text-gray-600 font-bold text-sm">Cuota Renting (Pago Inversión)</span>
-                <p className="text-[10px] text-gray-400">{data.rentingMonths} meses al {data.rentingInterest}%</p>
-              </div>
-              <span className="text-xl font-bold text-amber-600">-{formatCurrency(results.monthlyRentingQuota)}</span>
-            </div>
-
-            <div className="pt-2">
-              <div className="bg-gradient-to-br from-emerald-600 to-sky-700 p-6 rounded-xl border-t border-white/20 shadow-lg text-white relative">
-                <div className="absolute top-4 right-4 bg-white/20 text-[10px] font-bold px-2 py-1 rounded">LIMPIO EN CAJA</div>
-                <p className="text-sky-100 text-xs font-bold uppercase mb-1 tracking-wider">Beneficio Neto Final</p>
-                <div className="flex items-baseline gap-2">
-                  <h2 className="text-4xl font-black">{formatCurrency(results.hpNetMonthlyProfit)}</h2>
-                  <span className="text-emerald-300 font-bold text-sm">Excedente</span>
+            {/* Fila 2 — costes operativos (mejorados) */}
+            <div className="py-4 border-b border-gray-100">
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-gray-500 font-medium text-sm">Costes Operativos HP</span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    <span className="text-[10px] bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded font-bold">Tinta 1,2€/m²</span>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">0h mantenimiento</span>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">0h espera</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-xl font-bold text-emerald-600">−{formatCurrency(results.hpMonthlyCost)}</span>
+                  <p className="text-[10px] text-emerald-600 font-bold mt-0.5">
+                    Ahorras {formatCurrency(results.currentMonthlyCost - results.hpMonthlyCost)}/mes
+                  </p>
                 </div>
               </div>
             </div>
-
-            {/* Mensaje de Valor */}
-            <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-lg flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-xl leading-none">✓</div>
-              <p className="text-emerald-800 text-xs leading-tight">
-                <strong>La máquina se paga sola:</strong> El ahorro en costes operativos cubre la cuota del renting y aún deja <strong>{formatCurrency(results.hpNetMonthlyProfit - results.currentMonthlyProfit)}</strong> de beneficio extra al mes.
-              </p>
+            {/* Fila 3 — renting (explicado) */}
+            <div className="py-4 border-b border-gray-100 bg-gray-50 -mx-6 px-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-gray-700 font-bold text-sm">Cuota Renting</span>
+                  <p className="text-xs text-gray-400 mt-0.5">Pago mensual por la nueva máquina</p>
+                  <p className="text-[10px] text-gray-400">{data.rentingMonths} meses · {data.rentingInterest}% anual</p>
+                </div>
+                <span className="text-xl font-bold text-amber-600">−{formatCurrency(results.monthlyRentingQuota)}</span>
+              </div>
+            </div>
+            {/* Resultado neto */}
+            <div className="pt-5">
+              <div className="rounded-xl bg-gradient-to-br from-sky-600 to-blue-700 p-5 text-white">
+                <p className="text-xs font-bold text-sky-200 uppercase tracking-widest mb-1">Beneficio Neto Final</p>
+                <p className="text-4xl font-black">{formatCurrency(results.hpNetMonthlyProfit)}</p>
+                <p className="text-xs text-sky-200 mt-2">Ventas − Operativos HP − Renting</p>
+              </div>
+              {/* Mensaje inteligente: positivo o neutro según números */}
+              {results.hpNetMonthlyProfit >= results.currentMonthlyProfit ? (
+                <div className="mt-3 bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex gap-3">
+                  <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">✓</div>
+                  <div>
+                    <p className="text-emerald-900 text-xs font-bold">La máquina se paga sola.</p>
+                    <p className="text-emerald-700 text-xs mt-0.5">
+                      El ahorro operativo cubre la cuota de renting y te deja <strong>{formatCurrency(results.hpNetMonthlyProfit - results.currentMonthlyProfit)}</strong> más de beneficio al mes.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-3 bg-sky-50 border border-sky-200 rounded-xl p-4 flex gap-3">
+                  <div className="w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">i</div>
+                  <div>
+                    <p className="text-sky-900 text-xs font-bold">La cuota de renting ({formatCurrency(results.monthlyRentingQuota)}) supera el ahorro operativo mensual ({formatCurrency(results.currentMonthlyCost - results.hpMonthlyCost)}).</p>
+                    <p className="text-sky-700 text-xs mt-0.5">
+                      La diferencia es <strong>{formatCurrency(results.monthlyRentingQuota - (results.currentMonthlyCost - results.hpMonthlyCost))}/mes</strong>. Sin embargo, la máquina te permite producir más volumen en el mismo tiempo — revisa el volumen mensual para ver el potencial real.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
       </div>
+
+      {/* Puente comparativo — diferencia neta */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gray-900 rounded-2xl p-6 text-white mb-8"
+      >
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">¿Qué implica el cambio? — Resumen mensual</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white/8 rounded-xl p-4 border border-white/10">
+            <p className="text-xs text-gray-400 mb-1">Ahorro operativo</p>
+            <p className="text-2xl font-black text-emerald-400">+{formatCurrency(results.currentMonthlyCost - results.hpMonthlyCost)}</p>
+            <p className="text-[10px] text-gray-500 mt-1">Menos tinta, 0 esperas, 0 mantenimiento</p>
+          </div>
+          <div className="bg-white/8 rounded-xl p-4 border border-white/10">
+            <p className="text-xs text-gray-400 mb-1">Cuota renting</p>
+            <p className="text-2xl font-black text-amber-400">−{formatCurrency(results.monthlyRentingQuota)}</p>
+            <p className="text-[10px] text-gray-500 mt-1">{data.rentingMonths} meses · {data.rentingInterest}% anual</p>
+          </div>
+          <div className="bg-white/8 rounded-xl p-4 border border-white/10">
+            <p className="text-xs text-gray-400 mb-1">Beneficio actual</p>
+            <p className="text-2xl font-black text-gray-200">{formatCurrency(results.currentMonthlyProfit)}</p>
+            <p className="text-[10px] text-gray-500 mt-1">Con solvente, sin renting</p>
+          </div>
+          <div className={`rounded-xl p-4 border ${results.hpNetMonthlyProfit >= results.currentMonthlyProfit ? 'bg-emerald-900/30 border-emerald-700/40' : 'bg-sky-900/30 border-sky-700/40'}`}>
+            <p className="text-xs text-gray-400 mb-1">Beneficio con HP Latex</p>
+            <p className={`text-2xl font-black ${results.hpNetMonthlyProfit >= results.currentMonthlyProfit ? 'text-emerald-300' : 'text-sky-300'}`}>{formatCurrency(results.hpNetMonthlyProfit)}</p>
+            <p className="text-[10px] text-gray-500 mt-1">Incluyendo cuota de renting</p>
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 mt-4 italic">* El verdadero potencial de HP Latex está en producir más volumen por día gracias al flujo continuo sin esperas de desgasificación.</p>
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

@@ -1,7 +1,50 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
+export interface CompetitorMachine {
+  brand: 'Roland' | 'Mimaki' | 'Epson';
+  model: string;
+  printSpeed: number; // m²/h
+  inkConsumption: number; // L/m²
+  weeklyMaintenance: number; // hours/week
+  inkPricePerLiter: number; // €/L reference price
+}
+
+export const COMPETITOR_MACHINES: CompetitorMachine[] = [
+  // Roland
+  { brand: 'Roland', model: 'VersaCAMM VSi-540i', printSpeed: 18.4, inkConsumption: 0.012, weeklyMaintenance: 2.0, inkPricePerLiter: 70 },
+  { brand: 'Roland', model: 'VersaCAMM VSi-640i', printSpeed: 21.6, inkConsumption: 0.012, weeklyMaintenance: 2.0, inkPricePerLiter: 70 },
+  { brand: 'Roland', model: 'TrueVIS VG2-540', printSpeed: 20.4, inkConsumption: 0.011, weeklyMaintenance: 1.5, inkPricePerLiter: 75 },
+  { brand: 'Roland', model: 'TrueVIS VG2-640', printSpeed: 24.0, inkConsumption: 0.011, weeklyMaintenance: 1.5, inkPricePerLiter: 75 },
+  { brand: 'Roland', model: 'TrueVIS SG2-540', printSpeed: 19.2, inkConsumption: 0.012, weeklyMaintenance: 2.0, inkPricePerLiter: 68 },
+  { brand: 'Roland', model: 'TrueVIS SG2-640', printSpeed: 22.8, inkConsumption: 0.012, weeklyMaintenance: 2.0, inkPricePerLiter: 68 },
+  // Mimaki
+  { brand: 'Mimaki', model: 'CJV150-75', printSpeed: 14.5, inkConsumption: 0.013, weeklyMaintenance: 2.5, inkPricePerLiter: 65 },
+  { brand: 'Mimaki', model: 'CJV150-107', printSpeed: 21.0, inkConsumption: 0.013, weeklyMaintenance: 2.5, inkPricePerLiter: 65 },
+  { brand: 'Mimaki', model: 'CJV150-130', printSpeed: 26.0, inkConsumption: 0.013, weeklyMaintenance: 2.5, inkPricePerLiter: 65 },
+  { brand: 'Mimaki', model: 'CJV150-160', printSpeed: 32.0, inkConsumption: 0.013, weeklyMaintenance: 2.5, inkPricePerLiter: 65 },
+  { brand: 'Mimaki', model: 'CJV300-130', printSpeed: 46.0, inkConsumption: 0.012, weeklyMaintenance: 2.0, inkPricePerLiter: 72 },
+  { brand: 'Mimaki', model: 'CJV300-160', printSpeed: 55.0, inkConsumption: 0.012, weeklyMaintenance: 2.0, inkPricePerLiter: 72 },
+  // Epson
+  { brand: 'Epson', model: 'SureColor SC-S40600', printSpeed: 18.0, inkConsumption: 0.010, weeklyMaintenance: 1.5, inkPricePerLiter: 80 },
+  { brand: 'Epson', model: 'SureColor SC-S60600', printSpeed: 35.0, inkConsumption: 0.010, weeklyMaintenance: 1.5, inkPricePerLiter: 80 },
+  { brand: 'Epson', model: 'SureColor SC-S80600', printSpeed: 50.0, inkConsumption: 0.010, weeklyMaintenance: 1.0, inkPricePerLiter: 85 },
+  { brand: 'Epson', model: 'SureColor SC-S60610', printSpeed: 36.0, inkConsumption: 0.010, weeklyMaintenance: 1.5, inkPricePerLiter: 80 },
+];
+
+export interface HPMachine {
+  model: string;
+  printSpeed: number; // m²/h — modo rápido (4 pasadas), official HP spec
+  hasCut: boolean;
+}
+
+export const HP_MACHINES: HPMachine[] = [
+  { model: 'HP Latex 630 Print & Cut', printSpeed: 18, hasCut: true },
+  { model: 'HP Latex 730', printSpeed: 31, hasCut: false },
+  { model: 'HP Latex 830', printSpeed: 36, hasCut: false },
+];
+
 export interface CalculatorData {
-  currentMachineType: string;
+  currentMachineModel: string;
   monthlyVolume: number; // m2
   inkPrice: number; // per Liter
   printSpeed: number; // m2/h
@@ -45,12 +88,12 @@ interface DataContextType {
 }
 
 const defaultData: CalculatorData = {
-  currentMachineType: 'Solvente Genérica',
+  currentMachineModel: 'Roland TrueVIS VG2-640',
   monthlyVolume: 1500,
-  inkPrice: 65,
-  printSpeed: 20,
-  maintenanceHours: 2,
-  waitHours: 6,
+  inkPrice: 75,
+  printSpeed: 24,
+  maintenanceHours: 1.5,
+  waitHours: 36,
   hpMachineModel: 'HP Latex 630 Print & Cut',
   hpMachinePrice: 19900,
   hpCartridgePrice: 118,
@@ -95,11 +138,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const operatorHourlyRate = 20; // €/hora estándar industria
 
     // ===== HP LATEX (DATOS FIJOS SEGÚN PDF PROMOCIÓN) =====
-    // Tinta: 1.2 €/m² (cartucho 1L = 118€, cobertura optimizada)
-    // Velocidad: 18 m²/h (según ficha técnica HP Latex 630 - modo exterior 4 pasadas)
-    // Mantenimiento: 0 horas/semana (sin mantenimiento preventivo)
-    // Espera: 0 horas (secado instantáneo)
-
     const hpInkCostPerM2 = 1.2; // Por m² impreso
     const hpPrintHours = data.monthlyVolume / data.hpPrintSpeed; // Horas solo impresión
     const hpOperatorCost = hpPrintHours * operatorHourlyRate; // Solo tiempo impresión, SIN mantenimiento
@@ -107,18 +145,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const hpTotalMonthly = hpMonthlyInkCost + hpOperatorCost; // Costo REAL HP
 
     // ===== COMPETENCIA (DATOS QUE INTRODUCE EL USUARIO) =====
-    // Cobertura tinta solvente: 12ml/m² (0.012 L/m²) - estándar industria
-    // Velocidad: la que introduce el usuario
-    // Mantenimiento: el que introduce el usuario (horas/semana)
-    // Espera: la que introduce el usuario (horas entre print y cut)
-
     const solventInkCoverage = 0.012; // L/m² - consumo estándar solvente
     const competitorInkCostPerM2 = solventInkCoverage * data.inkPrice; // Calcula €/m² basado en precio/L
 
     const currentMonthlyInkCost = data.monthlyVolume * competitorInkCostPerM2;
     const currentPrintHours = data.monthlyVolume / data.printSpeed;
     const currentOperatorCost = (currentPrintHours + (data.maintenanceHours * 4)) * operatorHourlyRate; // 4 semanas/mes
-    // Coste oportunidad por espera: si esperas 6h por trabajo, hay pérdida de productividad aproximada
     const currentWaitCost = (data.monthlyVolume / 50) * 0.5 * operatorHourlyRate; // Manejos de rollo
 
     const currentTotalMonthly = currentMonthlyInkCost + currentOperatorCost + currentWaitCost;
@@ -142,7 +174,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const hpMonthlyProfit = monthlyRevenue - hpTotalMonthly;
 
     // Renting Calculation (EMI Formula)
-    // M = P * [r(1+r)^n] / [(1+r)^n – 1]
     const loanAmount = data.hpMachinePrice;
     const monthlyInterestRate = (data.rentingInterest / 100) / 12;
     const numberOfPayments = data.rentingMonths;
