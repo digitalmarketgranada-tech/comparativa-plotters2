@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { useData, COMPETITOR_MACHINES } from '../context/DataContext';
+import { useData, ALL_MACHINES } from '../context/DataContext';
 import { Download, Printer, TrendingUp, Euro, Clock, Leaf, Monitor, BarChart3, CheckCircle, AlertTriangle } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -60,10 +60,11 @@ const Report: React.FC = () => {
   const fc2 = (val: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
-  const competitorMachine = COMPETITOR_MACHINES.find(m => m.model === data.currentMachineModel);
-  const solventSaving = results.currentMonthlyCost - results.hpMonthlyCost;
-  const rentingCoversRatio = solventSaving / results.monthlyRentingQuota;
-  const roiOk = results.hpNetMonthlyProfit >= results.currentMonthlyProfit;
+  const machineA = ALL_MACHINES.find(m => m.model === data.machineAModel);
+  const machineB = ALL_MACHINES.find(m => m.model === data.machineBModel);
+  const solventSaving = results.machineACost - results.machineBCost;
+  const rentingCoversRatio = results.monthlyRentingQuota > 0 ? solventSaving / results.monthlyRentingQuota : 0;
+  const roiOk = results.machineBNetProfit >= results.machineAProfit;
 
   const handleDownloadPdf = async () => {
     setDownloading(true);
@@ -137,7 +138,7 @@ const Report: React.FC = () => {
             <img src="/assets/logo-dm.png" alt="Digital Market" className="h-12 w-auto" />
             <div>
               <h2 className="text-xl font-black text-gray-900 leading-tight">Informe de Viabilidad ROI</h2>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">HP Latex Print & Cut — Análisis Comparativo</p>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Comparativa de Impresoras — Análisis de Costes</p>
             </div>
           </div>
           <div className="text-right text-xs text-gray-400">
@@ -171,18 +172,15 @@ const Report: React.FC = () => {
                 className="text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider"
                 style={{ backgroundColor: HEX_COLORS.rose[600] }}
               >
-                Máquina Actual — Solvente
+                Máquina A — {machineA?.brand ?? ''}
               </div>
               <div className="p-4 space-y-2">
-                <DataRow label="Modelo" value={data.currentMachineModel} />
+                <DataRow label="Modelo" value={data.machineAModel} />
                 <DataRow label="Volumen mensual" value={`${data.monthlyVolume} m²/mes`} />
-                <DataRow label="Velocidad impresión" value={`${data.printSpeed} m²/h`} />
-                <DataRow label="Precio tinta" value={`${fc2(data.inkPrice)}/L`} />
-                <DataRow label="Mantenimiento semanal" value={`${data.maintenanceHours}h/semana`} />
-                <DataRow label="Espera desgasificación" value={`${data.waitHours}h`} highlight="rose" />
-                {competitorMachine && (
-                  <DataRow label="Consumo tinta" value={`${(competitorMachine.inkConsumption * 1000).toFixed(0)} ml/m²`} />
-                )}
+                <DataRow label="Velocidad impresión" value={`${data.machineASpeed} m²/h`} />
+                <DataRow label="Coste tinta" value={`${fc2(data.machineAInkCost)}/m²`} />
+                <DataRow label="Mantenimiento semanal" value={`${data.machineAMaintenance}h/semana`} />
+                <DataRow label="Secado" value={data.machineADryTime === 0 ? '0h — instantáneo' : `${data.machineADryTime}h`} highlight={data.machineADryTime === 0 ? 'emerald' : 'rose'} />
               </div>
             </div>
             {/* Solución HP */}
@@ -194,16 +192,15 @@ const Report: React.FC = () => {
                 className="text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider"
                 style={{ backgroundColor: HEX_COLORS.sky[600] }}
               >
-                Solución HP Latex
+                Máquina B — {machineB?.brand ?? ''}
               </div>
               <div className="p-4 space-y-2">
-                <DataRow label="Modelo HP" value={data.hpMachineModel} />
-                <DataRow label="Velocidad HP (4 pasadas)" value={`${data.hpPrintSpeed} m²/h`} highlight="sky" />
-                <DataRow label="Precio máquina" value={fc(data.hpMachinePrice)} />
-                <DataRow label="Tinta HP (cartuchos 1L)" value={`${fc2(data.hpCartridgePrice)}/cartucho`} />
-                <DataRow label="Coste tinta HP" value="1,20 €/m² (estándar)" />
-                <DataRow label="Espera desgasificación" value="0h — curado instantáneo" highlight="emerald" />
-                <DataRow label="Mantenimiento" value="0h/semana" highlight="emerald" />
+                <DataRow label="Modelo" value={data.machineBModel} />
+                <DataRow label="Velocidad" value={`${data.machineBSpeed} m²/h`} highlight="sky" />
+                <DataRow label="Precio máquina" value={fc(data.machineBPrice)} />
+                <DataRow label="Coste tinta" value={`${fc2(data.machineBInkCost)}/m²`} />
+                <DataRow label="Secado" value={data.machineBDryTime === 0 ? '0h — instantáneo' : `${data.machineBDryTime}h`} highlight={data.machineBDryTime === 0 ? 'emerald' : 'rose'} />
+                <DataRow label="Mantenimiento" value={`${data.machineBMaintenance}h/semana`} highlight={data.machineBMaintenance === 0 ? 'emerald' : undefined} />
               </div>
             </div>
           </div>
@@ -253,15 +250,15 @@ const Report: React.FC = () => {
                 </tr>
                 <tr style={{ backgroundColor: HEX_COLORS.gray[50] }}>
                   <td className="px-4 py-3 text-gray-700 font-medium">Costes operativos (tinta + mano obra + esperas)</td>
-                  <td className="px-4 py-3 text-right font-bold" style={{ color: HEX_COLORS.rose[600] }}>−{fc(results.currentMonthlyCost)}</td>
-                  <td className="px-4 py-3 text-right font-bold" style={{ color: HEX_COLORS.emerald[600] }}>−{fc(results.hpMonthlyCost)}</td>
-                  <td className="px-4 py-3 text-right font-bold" style={{ color: HEX_COLORS.emerald[600] }}>+{fc(solventSaving)}</td>
+                  <td className="px-4 py-3 text-right font-bold" style={{ color: HEX_COLORS.rose[600] }}>−{fc(results.machineACost)}</td>
+                  <td className="px-4 py-3 text-right font-bold" style={{ color: HEX_COLORS.emerald[600] }}>−{fc(results.machineBCost)}</td>
+                  <td className="px-4 py-3 text-right font-bold" style={{ color: solventSaving > 0 ? HEX_COLORS.emerald[600] : HEX_COLORS.rose[600] }}>{solventSaving > 0 ? '+' : ''}{fc(solventSaving)}</td>
                 </tr>
                 <tr className="bg-white">
                   <td className="px-4 py-3 text-gray-700 font-medium">Beneficio bruto</td>
-                  <td className="px-4 py-3 text-right font-bold text-gray-900">{fc(results.currentMonthlyProfit)}</td>
-                  <td className="px-4 py-3 text-right font-bold text-gray-900">{fc(results.hpMonthlyProfit)}</td>
-                  <td className="px-4 py-3 text-right font-bold" style={{ color: HEX_COLORS.emerald[600] }}>+{fc(results.hpMonthlyProfit - results.currentMonthlyProfit)}</td>
+                  <td className="px-4 py-3 text-right font-bold text-gray-900">{fc(results.machineAProfit)}</td>
+                  <td className="px-4 py-3 text-right font-bold text-gray-900">{fc(results.machineBProfit)}</td>
+                  <td className="px-4 py-3 text-right font-bold" style={{ color: results.machineBProfit >= results.machineAProfit ? HEX_COLORS.emerald[600] : HEX_COLORS.rose[600] }}>{results.machineBProfit >= results.machineAProfit ? '+' : ''}{fc(results.machineBProfit - results.machineAProfit)}</td>
                 </tr>
                 <tr style={{ backgroundColor: HEX_COLORS.amber[50] }}>
                   <td className="px-4 py-3 text-gray-700 font-medium">Cuota renting HP ({data.rentingMonths}m · {data.rentingInterest}%)</td>
@@ -277,18 +274,18 @@ const Report: React.FC = () => {
                   }}
                 >
                   <td className="px-4 py-3 font-black text-gray-900">Beneficio neto final</td>
-                  <td className="px-4 py-3 text-right font-black text-gray-900">{fc(results.currentMonthlyProfit)}</td>
+                  <td className="px-4 py-3 text-right font-black text-gray-900">{fc(results.machineAProfit)}</td>
                   <td
                     className="px-4 py-3 text-right font-black text-xl"
                     style={{ color: roiOk ? HEX_COLORS.emerald[600] : HEX_COLORS.sky[600] }}
                   >
-                    {fc(results.hpNetMonthlyProfit)}
+                    {fc(results.machineBNetProfit)}
                   </td>
                   <td
                     className="px-4 py-3 text-right font-black"
                     style={{ color: roiOk ? HEX_COLORS.emerald[600] : HEX_COLORS.sky[500] }}
                   >
-                    {roiOk ? '+' : ''}{fc(results.hpNetMonthlyProfit - results.currentMonthlyProfit)}
+                    {roiOk ? '+' : ''}{fc(results.machineBNetProfit - results.machineAProfit)}
                   </td>
                 </tr>
               </tbody>
@@ -331,8 +328,8 @@ const Report: React.FC = () => {
                 Proceso Actual (Solvente)
               </div>
               <div className="p-4 space-y-2 text-sm">
-                <FlowStep num={1} label="Impresión" detail={`~${(data.monthlyVolume / (data.printSpeed * 168)).toFixed(0)}h producción mensual a ${data.printSpeed} m²/h`} bad />
-                <FlowStep num={2} label={`Desgasificación — esperar ${data.waitHours}h`} detail="Plotter de corte bloqueado" bad />
+                <FlowStep num={1} label="Impresión" detail={`~${(data.monthlyVolume / (data.machineASpeed * 168)).toFixed(0)}h producción mensual a ${data.machineASpeed} m²/h`} bad />
+                <FlowStep num={2} label={`Secado — esperar ${data.machineADryTime}h`} detail="Plotter de corte bloqueado" bad />
                 <FlowStep num={3} label="Laminado (si aplica)" detail="Solo posible tras desgasificación completa" bad />
                 <FlowStep num={4} label="Corte" detail="Solo cuando ha terminado todo lo anterior" bad />
                 <div
@@ -354,7 +351,7 @@ const Report: React.FC = () => {
                 Proceso HP Latex (sin esperas)
               </div>
               <div className="p-4 space-y-2 text-sm">
-                <FlowStep num={1} label="Impresión HP Latex" detail={`${data.hpPrintSpeed} m²/h — curado instantáneo en máquina`} ok />
+                <FlowStep num={1} label={`Impresión ${machineB?.model ?? 'Máquina B'}`} detail={`${data.machineBSpeed} m²/h — secado: ${data.machineBDryTime === 0 ? 'instantáneo' : data.machineBDryTime + 'h'}`} ok />
                 <FlowStep num={2} label="Plotter libre durante impresión" detail="Puede cortar otro pedido mientras se imprime" ok />
                 <FlowStep num={3} label="Laminado (si aplica)" detail="Posible 1 min después de salir de impresora" ok />
                 <FlowStep num={4} label="Corte inmediato" detail="Sin esperar desgasificación" ok />
@@ -427,11 +424,11 @@ const Report: React.FC = () => {
           >
             <table className="w-full text-sm">
               <tbody className="divide-y" style={{ divideColor: HEX_COLORS.gray[100] }}>
-                <tr><td className="px-4 py-2.5 text-gray-500">Precio máquina HP</td><td className="px-4 py-2.5 font-bold text-gray-900 text-right">{fc(data.hpMachinePrice)}</td></tr>
+                <tr><td className="px-4 py-2.5 text-gray-500">Precio Máquina B ({data.machineBModel})</td><td className="px-4 py-2.5 font-bold text-gray-900 text-right">{fc(data.machineBPrice)}</td></tr>
                 <tr><td className="px-4 py-2.5 text-gray-500">Duración del renting</td><td className="px-4 py-2.5 font-bold text-gray-900 text-right">{data.rentingMonths} meses ({data.rentingMonths / 12} años)</td></tr>
                 <tr><td className="px-4 py-2.5 text-gray-500">Tipo de interés anual</td><td className="px-4 py-2.5 font-bold text-gray-900 text-right">{data.rentingInterest}%</td></tr>
                 <tr style={{ backgroundColor: HEX_COLORS.amber[50] }}><td className="px-4 py-2.5 font-bold text-gray-700">Cuota mensual renting</td><td className="px-4 py-2.5 font-black text-right text-lg" style={{ color: HEX_COLORS.amber[600] }}>{fc(results.monthlyRentingQuota)}</td></tr>
-                <tr><td className="px-4 py-2.5 text-gray-500">Ahorro operativo mensual HP vs Solvente</td><td className="px-4 py-2.5 font-bold text-right" style={{ color: HEX_COLORS.emerald[600] }}>{fc(solventSaving)}</td></tr>
+                <tr><td className="px-4 py-2.5 text-gray-500">Diferencia de costes operativos (A − B)</td><td className="px-4 py-2.5 font-bold text-right" style={{ color: solventSaving > 0 ? HEX_COLORS.emerald[600] : HEX_COLORS.rose[600] }}>{fc(solventSaving)}</td></tr>
                 <tr style={{ backgroundColor: HEX_COLORS.gray[100] }}><td className="px-4 py-2.5 font-bold text-gray-700">El ahorro cubre el {Math.min(100, Math.round(rentingCoversRatio * 100))}% de la cuota</td><td className="px-4 py-2.5 font-black text-right">{fc(results.monthlyRentingQuota * Math.min(1, rentingCoversRatio))} / {fc(results.monthlyRentingQuota)}</td></tr>
               </tbody>
             </table>

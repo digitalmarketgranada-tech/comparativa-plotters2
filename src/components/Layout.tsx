@@ -18,7 +18,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { path: '/', label: 'Calculadora', icon: Calculator },
+    { path: '/', label: 'Comparador', icon: Calculator },
     { path: '/cost-breakdown', label: 'Costes', icon: DollarSign },
     { path: '/workflow', label: 'Flujo de Trabajo', icon: GitCompare },
     { path: '/technical', label: 'Detalle Técnico', icon: Settings },
@@ -47,7 +47,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {/* Logo */}
         <div className="px-5 py-5 border-b border-gray-100">
           <img src="/assets/logo-dm.png" alt="Digital Market" className="h-10 w-auto" />
-          <p className="text-[10px] text-gray-400 font-medium mt-2 uppercase tracking-widest">Calculadora ROI</p>
+          <p className="text-[10px] text-gray-400 font-medium mt-2 uppercase tracking-widest">Comparador de Impresoras</p>
         </div>
 
         {/* Nav */}
@@ -77,8 +77,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {/* Footer */}
         <div className="px-4 py-4 border-t border-gray-100">
           <p className="text-[10px] text-gray-400 font-medium leading-relaxed">
-            Calculadora DM — Digital Market<br />
-            Herramienta de Análisis ROI HP Latex
+            Digital Market<br />
+            Comparador de Impresoras
           </p>
         </div>
       </aside>

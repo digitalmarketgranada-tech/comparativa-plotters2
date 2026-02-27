@@ -1,30 +1,34 @@
 import React from 'react';
-import { useData } from '../context/DataContext';
-import {
-  TrendingUp,
-  Clock,
-  Euro,
-  CheckCircle,
-  ArrowRight,
-  Printer,
-  Zap,
-  Leaf,
-  Shield
-} from 'lucide-react';
+import { useData, ALL_MACHINES } from '../context/DataContext';
+import { TrendingUp, Clock, Euro, ArrowRight, Printer, Zap, GitCompare, DollarSign } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
   const { results, data } = useData();
 
-  const formatCurrency = (val: number) =>
+  const fmt = (val: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
+
+  const machineA = ALL_MACHINES.find(m => m.model === data.machineAModel);
+  const machineB = ALL_MACHINES.find(m => m.model === data.machineBModel);
+  const nameA = machineA?.model ?? 'Máquina A';
+  const nameB = machineB?.model ?? 'Máquina B';
+  const shortA = nameA.length > 20 ? nameA.slice(0, 20) + '…' : nameA;
+  const shortB = nameB.length > 20 ? nameB.slice(0, 20) + '…' : nameB;
+
+  const bIsCheaper = results.machineBCost < results.machineACost;
+  const monthlySavings = results.machineACost - results.machineBCost;
 
   return (
     <div className="space-y-8">
       <header className="mb-6">
-        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Resumen Ejecutivo</h1>
-        <p className="text-gray-500 mt-1 font-medium">Visión general del impacto financiero y operativo.</p>
+        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Resumen Comparativo</h1>
+        <p className="text-gray-500 mt-1 font-medium">
+          <span className="text-indigo-600 font-semibold">{shortA}</span>
+          {' '}vs{' '}
+          <span className="text-amber-600 font-semibold">{shortB}</span>
+        </p>
       </header>
 
       {/* Hero Card */}
@@ -32,40 +36,39 @@ const Dashboard: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative overflow-hidden rounded-2xl shadow-xl"
-        style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0c4a6e 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a5f 100%)' }}
       >
-        {/* Decorative circles */}
-        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-sky-500/10 pointer-events-none" />
-        <div className="absolute -right-6 -bottom-20 w-80 h-80 rounded-full bg-blue-600/10 pointer-events-none" />
-        <div className="absolute left-1/2 top-0 w-px h-full bg-white/5 pointer-events-none" />
+        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-indigo-500/10 pointer-events-none" />
+        <div className="absolute -right-6 -bottom-20 w-80 h-80 rounded-full bg-amber-600/10 pointer-events-none" />
 
         <div className="relative z-10 p-8 md:p-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold uppercase tracking-wider mb-5 border border-emerald-500/30">
                 <TrendingUp size={12} />
-                Ahorro Anual Proyectado
+                Diferencia Anual
               </div>
               <div className="flex items-baseline gap-4">
-                <h2 className="text-5xl md:text-6xl font-black tracking-tight text-white">{formatCurrency(results.annualSavings)}</h2>
-                <span className="text-lg text-emerald-400 font-bold">+ {Math.round(results.productionTimeSavings * 12)}h/año</span>
+                <h2 className="text-5xl md:text-6xl font-black tracking-tight text-white">{fmt(results.annualSavings)}</h2>
+                <span className={`text-lg font-bold ${bIsCheaper ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {bIsCheaper ? `B más económica` : `A más económica`}
+                </span>
               </div>
               <p className="text-slate-400 mt-4 max-w-lg text-base leading-relaxed">
-                Ahorro basado en reducción de costes operativos, eliminación de tiempos de espera y menor consumo de tinta.
+                Diferencia de costes operativos anuales entre las dos máquinas seleccionadas.
               </p>
             </div>
 
             <div className="flex flex-col gap-3 min-w-[200px]">
               <div className="bg-white/8 backdrop-blur-sm rounded-xl p-5 border border-white/10">
-                <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">Retorno de Inversión</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-black text-white">{results.roiMonths.toFixed(1)} meses</span>
-                </div>
-                <span className="inline-block mt-2 text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full font-bold">Amortización Rápida</span>
+                <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">ROI Máquina B</p>
+                <span className="text-2xl font-black text-white">
+                  {isFinite(results.roiMonths) ? `${results.roiMonths.toFixed(1)} meses` : '—'}
+                </span>
               </div>
               <div className="bg-white/8 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center">
                 <p className="text-slate-400 text-xs font-semibold mb-1">Ahorro Mensual</p>
-                <p className="text-xl font-black text-sky-300">{formatCurrency(results.monthlySavings)}</p>
+                <p className={`text-xl font-black ${bIsCheaper ? 'text-emerald-300' : 'text-rose-300'}`}>{fmt(monthlySavings)}</p>
               </div>
             </div>
           </div>
@@ -74,110 +77,107 @@ const Dashboard: React.FC = () => {
 
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Productivity */}
+        {/* Speed comparison */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
           className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
         >
-          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-indigo-200">
+          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-indigo-200">
             <Printer size={22} />
           </div>
-          <h3 className="text-base font-black text-gray-900 mb-1.5">Productividad Dual</h3>
-          <p className="text-gray-500 text-sm mb-4 leading-relaxed">
-            Imprime y corta simultáneamente — flujo continuo sin interrupciones.
-          </p>
-          <div className="flex items-center gap-2 text-sm font-bold text-indigo-700 bg-indigo-50 px-3 py-2 rounded-lg w-fit">
-            <CheckCircle size={15} />
-            2x Más Rápido
+          <h3 className="text-base font-black text-gray-900 mb-3">Velocidad de Impresión</h3>
+          <div className="space-y-2">
+            <div>
+              <div className="flex justify-between text-xs font-semibold mb-1">
+                <span className="text-indigo-600">{shortA}</span>
+                <span className="text-gray-700">{data.machineASpeed} m²/h</span>
+              </div>
+              <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                <div className="bg-indigo-500 h-full rounded-full" style={{ width: `${Math.min(100, (data.machineASpeed / Math.max(data.machineASpeed, data.machineBSpeed)) * 100)}%` }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs font-semibold mb-1">
+                <span className="text-amber-600">{shortB}</span>
+                <span className="text-gray-700">{data.machineBSpeed} m²/h</span>
+              </div>
+              <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                <div className="bg-amber-500 h-full rounded-full" style={{ width: `${Math.min(100, (data.machineBSpeed / Math.max(data.machineASpeed, data.machineBSpeed)) * 100)}%` }} />
+              </div>
+            </div>
           </div>
         </motion.div>
 
-        {/* Time Savings */}
+        {/* Dry time comparison */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
           className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
         >
           <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-amber-200">
             <Clock size={22} />
           </div>
-          <h3 className="text-base font-black text-gray-900 mb-3">Tiempo de Entrega</h3>
-          <div className="space-y-2.5">
-            <div>
-              <div className="flex justify-between items-center text-xs mb-1 font-semibold">
-                <span className="text-gray-500">HP Latex</span>
-                <span className="text-emerald-600">Inmediato ✓</span>
-              </div>
-              <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                <div className="bg-emerald-500 h-full w-full rounded-full" />
-              </div>
+          <h3 className="text-base font-black text-gray-900 mb-3">Tiempo de Secado</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-indigo-600 font-semibold">{shortA}</span>
+              <span className={`text-sm font-black ${data.machineADryTime === 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                {data.machineADryTime === 0 ? 'Instantáneo ✓' : `${data.machineADryTime}h espera`}
+              </span>
             </div>
-            <div>
-              <div className="flex justify-between items-center text-xs mb-1 font-semibold">
-                <span className="text-gray-500">Eco-Solvente</span>
-                <span className="text-rose-500">Esperar {data.waitHours}h</span>
-              </div>
-              <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                <div className="bg-rose-500 h-full w-[18%] rounded-full" />
-              </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-amber-600 font-semibold">{shortB}</span>
+              <span className={`text-sm font-black ${data.machineBDryTime === 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                {data.machineBDryTime === 0 ? 'Instantáneo ✓' : `${data.machineBDryTime}h espera`}
+              </span>
             </div>
           </div>
         </motion.div>
 
-        {/* Cost Efficiency */}
+        {/* Cost comparison */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
           className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
         >
           <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-200">
             <Euro size={22} />
           </div>
-          <h3 className="text-base font-black text-gray-900 mb-3">Eficiencia de Costes</h3>
+          <h3 className="text-base font-black text-gray-900 mb-3">Coste Operativo Mensual</h3>
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 bg-rose-50 rounded-xl border border-rose-100">
-              <p className="text-[10px] text-rose-500 font-bold uppercase mb-1">Actual</p>
-              <p className="text-base font-black text-gray-900">{formatCurrency(results.currentMonthlyCost)}</p>
-              <p className="text-[10px] text-gray-400">/mes</p>
+            <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-100">
+              <p className="text-[10px] text-indigo-500 font-bold uppercase mb-1">Máq. A</p>
+              <p className="text-base font-black text-gray-900">{fmt(results.machineACost)}</p>
             </div>
-            <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-              <p className="text-[10px] text-emerald-600 font-bold uppercase mb-1">HP Latex</p>
-              <p className="text-base font-black text-emerald-700">{formatCurrency(results.hpMonthlyCost)}</p>
-              <p className="text-[10px] text-gray-400">/mes</p>
+            <div className="p-3 bg-amber-50 rounded-xl border border-amber-100">
+              <p className="text-[10px] text-amber-600 font-bold uppercase mb-1">Máq. B</p>
+              <p className="text-base font-black text-amber-700">{fmt(results.machineBCost)}</p>
             </div>
           </div>
         </motion.div>
       </div>
 
-      {/* Call to Action */}
+      {/* CTA */}
       <div className="flex justify-end">
         <Link
-          to="/calculator"
+          to="/"
           className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-800 transition-colors shadow-sm hover:shadow-md"
         >
-          Personalizar Cálculo
+          Cambiar Máquinas
           <ArrowRight size={18} />
         </Link>
       </div>
 
-      {/* HP Advantages Section */}
+      {/* Info grid */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-2xl p-8 border border-sky-100 shadow-sm"
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+        className="bg-gradient-to-br from-slate-50 to-gray-100 rounded-2xl p-8 border border-gray-200 shadow-sm"
       >
-        <h2 className="text-xl font-black text-gray-900 mb-6">Ventajas de HP Latex Print &amp; Cut</h2>
+        <h2 className="text-xl font-black text-gray-900 mb-6">Factores de Coste Comparados</h2>
         <div className="grid md:grid-cols-2 gap-5">
           {[
-            { icon: Zap, color: 'text-amber-500 bg-amber-50', title: 'Secado Instantáneo', desc: 'Tinta latex curable con calor — sin tiempo de espera para desgasificación.' },
-            { icon: Printer, color: 'text-sky-500 bg-sky-50', title: 'Print & Cut Simultáneo', desc: 'Corte inmediato sin esperas — reduce el tiempo total de producción.' },
-            { icon: Shield, color: 'text-violet-500 bg-violet-50', title: 'Menor Mantenimiento', desc: 'Sistema de tinta latex más estable — menos limpiezas y recambios.' },
-            { icon: Leaf, color: 'text-emerald-500 bg-emerald-50', title: 'Mejor Sostenibilidad', desc: 'Sin solventes — más saludable para operarios y medio ambiente.' },
+            { icon: DollarSign, color: 'text-indigo-500 bg-indigo-50', title: 'Tinta €/m²', desc: `A: ${data.machineAInkCost.toFixed(2)}€/m²  ·  B: ${data.machineBInkCost.toFixed(2)}€/m²` },
+            { icon: GitCompare, color: 'text-amber-500 bg-amber-50', title: 'Velocidad', desc: `A: ${data.machineASpeed} m²/h  ·  B: ${data.machineBSpeed} m²/h` },
+            { icon: Clock, color: 'text-rose-500 bg-rose-50', title: 'Mantenimiento semanal', desc: `A: ${data.machineAMaintenance}h/sem  ·  B: ${data.machineBMaintenance}h/sem` },
+            { icon: Zap, color: 'text-emerald-500 bg-emerald-50', title: 'Tiempo de secado', desc: `A: ${data.machineADryTime === 0 ? 'Ins tantáneo' : data.machineADryTime + 'h'}  ·  B: ${data.machineBDryTime === 0 ? 'Instantáneo' : data.machineBDryTime + 'h'}` },
           ].map(({ icon: Icon, color, title, desc }, i) => (
             <div key={i} className="flex gap-4 bg-white/70 rounded-xl p-4 border border-white shadow-sm hover:shadow-md transition-shadow">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
