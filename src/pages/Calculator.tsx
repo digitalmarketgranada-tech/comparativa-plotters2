@@ -356,11 +356,37 @@ const Calculator: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Precios de Venta (€/m²)</h3>
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Costes de Material base (€/m²)</h3>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { label: 'Lona', name: 'lonaSellPrice', val: data.lonaSellPrice },
-                    { label: 'Vinilo', name: 'viniloSellPrice', val: data.viniloSellPrice },
+                    { label: 'Lona', name: 'lonaMaterialCost', val: data.lonaMaterialCost },
+                    { label: 'Vinilo', name: 'viniloMaterialCost', val: data.viniloMaterialCost },
+                  ].map(({ label, name, val }) => (
+                    <div key={name}>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">{label}</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-3.5 text-gray-400 font-bold text-sm">€</span>
+                        <input
+                          type="number"
+                          value={val}
+                          onChange={e => updateData({ [name]: Number(e.target.value) })}
+                          step="0.01"
+                          className="w-full px-4 py-3 pl-7 rounded-xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-gray-900 font-semibold bg-gray-50 focus:bg-white outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Precios de Venta Final (€/m²)</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { label: 'PVP Lona', name: 'lonaSellPrice', val: data.lonaSellPrice },
+                    { label: 'PVP Vinilo', name: 'viniloSellPrice', val: data.viniloSellPrice },
                   ].map(({ label, name, val }) => (
                     <div key={name}>
                       <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">{label}</label>

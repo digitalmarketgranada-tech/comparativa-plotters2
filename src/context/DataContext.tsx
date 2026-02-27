@@ -54,6 +54,9 @@ export interface CalculatorData {
   machineBModel: string;
   // Shared
   monthlyVolume: number; // m²
+  // Material Costs
+  lonaMaterialCost: number;   // €/m²
+  viniloMaterialCost: number; // €/m²
   // Machine A parameters (auto-filled, editable)
   machineASpeed: number;
   machineAInkCost: number;   // €/m²
@@ -88,12 +91,6 @@ export interface CalculationResults {
   machineBProfit: number;
   monthlyRentingQuota: number;
   machineBNetProfit: number;
-  // Aliases for backward compatibility
-  currentMonthlyCost: number;
-  hpMonthlyCost: number;
-  currentMonthlyProfit: number;
-  hpMonthlyProfit: number;
-  hpNetMonthlyProfit: number;
 }
 
 interface DataContextType {
@@ -112,6 +109,8 @@ const defaultData: CalculatorData = {
   machineAModel: defaultMachineA.model,
   machineBModel: defaultMachineB.model,
   monthlyVolume: 1500,
+  lonaMaterialCost: 1.00,
+  viniloMaterialCost: 1.45,
   machineASpeed: defaultMachineA.printSpeed,
   machineAInkCost: defaultMachineA.inkCostPerM2,
   machineAMaintenance: defaultMachineA.weeklyMaintenance,
@@ -132,20 +131,25 @@ const defaultData: CalculatorData = {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-// Symmetric cost formula: ink + operator (print + maintenance) + wait handling
+// Symmetric cost formula: ink + material + operator (print + maintenance) + wait handling
 const calcMachineCost = (
   volume: number,
   speed: number,
-  inkCost: number,
+  inkCostPerM2: number,
   maintenance: number,
   dryTime: number,
+  lonaPerc: number,
+  viniloPerc: number,
+  lonaMatCost: number,
+  viniloMatCost: number,
   operatorRate = 20
 ): number => {
-  const inkTotal = volume * inkCost;
+  const inkTotal = volume * inkCostPerM2;
+  const materialTotal = (volume * (lonaPerc / 100) * lonaMatCost) + (volume * (viniloPerc / 100) * viniloMatCost);
   const printHours = volume / (speed || 1);
   const operatorCost = (printHours + maintenance * 4) * operatorRate;
   const waitCost = dryTime > 0 ? (volume / 50) * 0.5 * operatorRate : 0;
-  return inkTotal + operatorCost + waitCost;
+  return inkTotal + materialTotal + operatorCost + waitCost;
 };
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -155,8 +159,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     roiMonths: 0, productionTimeSavings: 0, monthlyRevenue: 0,
     machineAProfit: 0, machineBProfit: 0, monthlyRentingQuota: 0,
     machineBNetProfit: 0,
-    currentMonthlyCost: 0, hpMonthlyCost: 0,
-    currentMonthlyProfit: 0, hpMonthlyProfit: 0, hpNetMonthlyProfit: 0,
   });
 
   const updateData = (newData: Partial<CalculatorData>) => {
@@ -169,8 +171,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const calculate = useCallback(() => {
     const vol = data.monthlyVolume;
 
-    const machineACost = calcMachineCost(vol, data.machineASpeed, data.machineAInkCost, data.machineAMaintenance, data.machineADryTime);
-    const machineBCost = calcMachineCost(vol, data.machineBSpeed, data.machineBInkCost, data.machineBMaintenance, data.machineBDryTime);
+    const machineACost = calcMachineCost(
+      vol, data.machineASpeed, data.machineAInkCost, data.machineAMaintenance, data.machineADryTime,
+      data.lonaPercentage, data.viniloPercentage, data.lonaMaterialCost, data.viniloMaterialCost
+    );
+    const machineBCost = calcMachineCost(
+      vol, data.machineBSpeed, data.machineBInkCost, data.machineBMaintenance, data.machineBDryTime,
+      data.lonaPercentage, data.viniloPercentage, data.lonaMaterialCost, data.viniloMaterialCost
+    );
 
     const monthlySavings = machineACost - machineBCost;
     const annualSavings = monthlySavings * 12;
@@ -201,12 +209,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       machineACost, machineBCost, monthlySavings, annualSavings, roiMonths,
       productionTimeSavings, monthlyRevenue, machineAProfit, machineBProfit,
       monthlyRentingQuota, machineBNetProfit,
-      // Backward-compatible aliases
-      currentMonthlyCost: machineACost,
-      hpMonthlyCost: machineBCost,
-      currentMonthlyProfit: machineAProfit,
-      hpMonthlyProfit: machineBProfit,
-      hpNetMonthlyProfit: machineBNetProfit,
     });
   }, [data]);
 

@@ -165,7 +165,7 @@ const Technical: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* ── Software / cloud ── */}
+      {/* ── Software / Connectivity ── */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -177,33 +177,30 @@ const Technical: React.FC = () => {
             <Cloud size={20} className="text-white" />
           </div>
           <div>
-            <h2 className="font-black text-white text-lg leading-tight">Ecosistema de Software</h2>
-            <p className="text-gray-400 text-xs">Capacidades de gestión y conectividad por fabricante</p>
+            <h2 className="font-black text-white text-lg leading-tight">Conectividad y Ecosistema Digital</h2>
+            <p className="text-gray-400 text-xs">Capacidades de gestión y monitoreo según fabricante</p>
           </div>
         </div>
         <div className="p-6">
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             {[
-              { icon: Wifi, color: 'bg-sky-50 text-sky-600 border-sky-100', title: 'Monitorización remota', hp: '✅ HP PrintOS Live', other: '⚠ Local / limitado' },
-              { icon: BarChart3, color: 'bg-violet-50 text-violet-600 border-violet-100', title: 'Analíticas producción', hp: '✅ HP Print Beat', other: '⚠ Parcial / RIP' },
-              { icon: Package, color: 'bg-emerald-50 text-emerald-600 border-emerald-100', title: 'Recepción archivos Web', hp: '✅ HP PrintOS Box', other: '❌ No' },
-              { icon: Zap, color: 'bg-amber-50 text-amber-600 border-amber-100', title: 'API abierta / integraciones', hp: '✅ Incluida', other: '❌ No' },
-            ].map(({ icon: Icon, color, title, hp, other }, i) => (
+              { icon: Wifi, color: 'bg-sky-50 text-sky-600 border-sky-100', title: 'Monitorización remota', desc: 'Permite seguir el estado de la producción desde dispositivos móviles o web.' },
+              { icon: BarChart3, color: 'bg-violet-50 text-violet-600 border-violet-100', title: 'Análisis de costes', desc: 'Herramientas integradas para el cálculo del consumo de tinta y soportes por cada trabajo.' },
+              { icon: Package, color: 'bg-emerald-50 text-emerald-600 border-emerald-100', title: 'Gestión de flujos RIP', desc: 'Compatibilidad con los principales software RIP (Onyx, Caldera, VersaWorks, RasterLink).' },
+              { icon: Zap, color: 'bg-amber-50 text-amber-600 border-amber-100', title: 'Actualizaciones OTA', desc: 'Descarga automática de perfiles de materiales y actualizaciones de sistema.' },
+            ].map(({ icon: Icon, color, title, desc }, i) => (
               <div key={i} className="rounded-xl p-4 border bg-white shadow-sm hover:shadow-md transition-shadow">
                 <div className={`w-9 h-9 rounded-lg border flex items-center justify-center mb-3 ${color}`}>
                   <Icon size={18} />
                 </div>
                 <h4 className="font-bold text-gray-900 text-sm mb-2">{title}</h4>
-                <p className="text-xs text-gray-500">
-                  <span className="font-semibold text-sky-700">HP Latex:</span> {hp}
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  <span className="font-semibold text-gray-600">Roland / Mimaki / Epson:</span> {other}
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  {desc}
                 </p>
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-400 italic">* HP PrintOS es una plataforma cloud gratuita exclusiva de impresoras HP Latex. Los competidores ofrecen variantes más limitadas o de pago.</p>
+          <p className="text-xs text-gray-400 italic">* Las funciones específicas dependen del modelo y el software de control (RIP) seleccionado para el flujo de trabajo.</p>
         </div>
       </motion.div>
     </div>

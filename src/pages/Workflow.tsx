@@ -164,7 +164,7 @@ const Workflow: React.FC = () => {
       </div>
 
       {/* Workflow cards */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <WorkflowCard
           title={shortA} subtitle="Máquina A"
           accentClass="border-indigo-100" headerClass="bg-indigo-600"

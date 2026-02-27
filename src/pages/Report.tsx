@@ -143,7 +143,7 @@ const Report: React.FC = () => {
           </div>
           <div className="text-right text-xs text-gray-400">
             <p className="font-bold text-gray-600 text-sm" style={{ color: HEX_COLORS.gray[600] }}>Digital Market</p>
-            <p>Partner Especialista HP</p>
+            <p>Especialistas en Impresión Gran Formato</p>
             <p className="mt-1">{new Date().toLocaleDateString('es-ES')}</p>
           </div>
         </div>
@@ -183,7 +183,7 @@ const Report: React.FC = () => {
                 <DataRow label="Secado" value={data.machineADryTime === 0 ? '0h — instantáneo' : `${data.machineADryTime}h`} highlight={data.machineADryTime === 0 ? 'emerald' : 'rose'} />
               </div>
             </div>
-            {/* Solución HP */}
+            {/* Máquina B */}
             <div
               className="rounded-xl border overflow-hidden"
               style={{ backgroundColor: HEX_COLORS.gray[50], borderColor: HEX_COLORS.gray[200] }}
@@ -200,7 +200,7 @@ const Report: React.FC = () => {
                 <DataRow label="Precio máquina" value={fc(data.machineBPrice)} />
                 <DataRow label="Coste tinta" value={`${fc2(data.machineBInkCost)}/m²`} />
                 <DataRow label="Secado" value={data.machineBDryTime === 0 ? '0h — instantáneo' : `${data.machineBDryTime}h`} highlight={data.machineBDryTime === 0 ? 'emerald' : 'rose'} />
-                <DataRow label="Mantenimiento" value={`${data.machineBMaintenance}h/semana`} highlight={data.machineBMaintenance === 0 ? 'emerald' : undefined} />
+                <DataRow label="Mantenimiento" value={`${data.machineBMaintenance}h/semana`} />
               </div>
             </div>
           </div>
@@ -236,8 +236,8 @@ const Report: React.FC = () => {
               <thead>
                 <tr className="border-b" style={{ backgroundColor: HEX_COLORS.gray[100], borderBottomColor: HEX_COLORS.gray[200] }}>
                   <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase w-1/2">Concepto</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: HEX_COLORS.rose[500] }}>Solvente Actual</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: HEX_COLORS.sky[600] }}>HP Latex</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: HEX_COLORS.rose[500] }}>Máquina A</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: HEX_COLORS.sky[600] }}>Máquina B</th>
                   <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: HEX_COLORS.emerald[600] }}>Diferencia</th>
                 </tr>
               </thead>
@@ -261,7 +261,7 @@ const Report: React.FC = () => {
                   <td className="px-4 py-3 text-right font-bold" style={{ color: results.machineBProfit >= results.machineAProfit ? HEX_COLORS.emerald[600] : HEX_COLORS.rose[600] }}>{results.machineBProfit >= results.machineAProfit ? '+' : ''}{fc(results.machineBProfit - results.machineAProfit)}</td>
                 </tr>
                 <tr style={{ backgroundColor: HEX_COLORS.amber[50] }}>
-                  <td className="px-4 py-3 text-gray-700 font-medium">Cuota renting HP ({data.rentingMonths}m · {data.rentingInterest}%)</td>
+                  <td className="px-4 py-3 text-gray-700 font-medium">Cuota financiación B ({data.rentingMonths}m · {data.rentingInterest}%)</td>
                   <td className="px-4 py-3 text-right text-gray-400">No aplica</td>
                   <td className="px-4 py-3 text-right font-bold" style={{ color: HEX_COLORS.amber[600] }}>−{fc(results.monthlyRentingQuota)}</td>
                   <td className="px-4 py-3 text-right text-gray-400">Inversión</td>
@@ -306,8 +306,8 @@ const Report: React.FC = () => {
             }
             <p className="text-sm text-gray-700 leading-relaxed">
               {roiOk
-                ? <><strong>La máquina se amortiza sola:</strong> el ahorro operativo ({fc(solventSaving)}/mes) cubre la cuota de renting ({fc(results.monthlyRentingQuota)}/mes) con un excedente de <strong style={{ color: HEX_COLORS.emerald[600] }}>{fc(results.hpNetMonthlyProfit - results.currentMonthlyProfit)}/mes</strong>.</>
-                : <><strong>El ahorro operativo ({fc(solventSaving)}/mes)</strong> no cubre íntegramente la cuota de renting ({fc(results.monthlyRentingQuota)}/mes). La diferencia de {fc(results.monthlyRentingQuota - solventSaving)}/mes se compensa con <strong>mayor capacidad productiva diaria</strong> (sin esperas de 24-48h) y la posibilidad de aceptar más pedidos al día.</>
+                ? <><strong>La máquina se amortiza sola:</strong> el ahorro operativo ({fc(solventSaving)}/mes) cubre la cuota de financiación ({fc(results.monthlyRentingQuota)}/mes) con un excedente de <strong style={{ color: HEX_COLORS.emerald[600] }}>{fc(results.machineBNetProfit - results.machineAProfit)}/mes</strong>.</>
+                : <><strong>El ahorro operativo ({fc(solventSaving)}/mes)</strong> no cubre íntegramente la cuota de financiación ({fc(results.monthlyRentingQuota)}/mes). La diferencia de {fc(results.monthlyRentingQuota - solventSaving)}/mes se compensa con <strong>mayor capacidad productiva diaria</strong> (sin esperas de secado) y la posibilidad de aceptar más pedidos al día.</>
               }
             </p>
           </div>
@@ -329,9 +329,9 @@ const Report: React.FC = () => {
               </div>
               <div className="p-4 space-y-2 text-sm">
                 <FlowStep num={1} label="Impresión" detail={`~${(data.monthlyVolume / (data.machineASpeed * 168)).toFixed(0)}h producción mensual a ${data.machineASpeed} m²/h`} bad />
-                <FlowStep num={2} label={`Secado — esperar ${data.machineADryTime}h`} detail="Plotter de corte bloqueado" bad />
-                <FlowStep num={3} label="Laminado (si aplica)" detail="Solo posible tras desgasificación completa" bad />
-                <FlowStep num={4} label="Corte" detail="Solo cuando ha terminado todo lo anterior" bad />
+                <FlowStep num={2} label={data.machineADryTime > 0 ? `Secado — esperar ${data.machineADryTime}h` : 'Secado inmediato'} detail={data.machineADryTime > 0 ? "Flujo de trabajo interrumpido comercialmente" : "Producción fluida"} bad={data.machineADryTime > 0} />
+                <FlowStep num={3} label="Laminado (si aplica)" detail={data.machineADryTime > 0 ? "Solo posible tras secado completo" : "Posible tras impresión"} bad={data.machineADryTime > 0} />
+                <FlowStep num={4} label="Corte / Acabado" detail="Siguiente paso tras secado o laminado" bad={data.machineADryTime > 0} />
                 <div
                   className="mt-3 rounded-lg p-3 border"
                   style={{ backgroundColor: HEX_COLORS.rose[50], borderColor: HEX_COLORS.rose[200] }}
@@ -348,33 +348,33 @@ const Report: React.FC = () => {
                 className="text-white px-4 py-2.5 text-xs font-black uppercase"
                 style={{ backgroundColor: HEX_COLORS.sky[600] }}
               >
-                Proceso HP Latex (sin esperas)
+                Proceso Máquina B (sin esperas de secado)
               </div>
               <div className="p-4 space-y-2 text-sm">
                 <FlowStep num={1} label={`Impresión ${machineB?.model ?? 'Máquina B'}`} detail={`${data.machineBSpeed} m²/h — secado: ${data.machineBDryTime === 0 ? 'instantáneo' : data.machineBDryTime + 'h'}`} ok />
-                <FlowStep num={2} label="Plotter libre durante impresión" detail="Puede cortar otro pedido mientras se imprime" ok />
-                <FlowStep num={3} label="Laminado (si aplica)" detail="Posible 1 min después de salir de impresora" ok />
-                <FlowStep num={4} label="Corte inmediato" detail="Sin esperar desgasificación" ok />
+                <FlowStep num={2} label="Acabado inmediato" detail="No requiere tiempos de espera para laminado o corte" ok />
+                <FlowStep num={3} label="Laminado (si aplica)" detail="Posible inmediatamente tras impresión" ok />
+                <FlowStep num={4} label="Entrega en el día" detail="Flujo optimizado para trabajos urgentes" ok />
                 <div
                   className="mt-3 rounded-lg p-3 border"
                   style={{ backgroundColor: HEX_COLORS.emerald[50], borderColor: HEX_COLORS.emerald[200] }}
                 >
-                  <p className="text-xs font-bold" style={{ color: HEX_COLORS.emerald[700] }}>Tiempo total hasta entrega: 2-5h mismo día</p>
+                  <p className="text-xs font-bold" style={{ color: HEX_COLORS.emerald[700] }}>Tiempo total hasta entrega: Optimizado (2-5h)</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── SECCIÓN 5: SOFTWARE HP PrintOS ── */}
+        {/* ── SECCIÓN 5: TECNOLOGÍA Y SOFTWARE ── */}
         <div>
-          <SectionTitle icon={BarChart3} label="HP PrintOS — Software Exclusivo en Nube" />
+          <SectionTitle icon={BarChart3} label="Capacidades de Gestión y Software" />
           <div className="mt-3 grid md:grid-cols-2 gap-3">
             {[
-              { t: 'PrintOS Live — Monitorización Remota', d: 'Controla estado de la impresora, cola y tinta en tiempo real desde cualquier dispositivo.' },
-              { t: 'Print Beat — Analíticas de Producción', d: 'Datos históricos y en tiempo real sobre rendimiento, consumo de tinta y KPIs de productividad.' },
-              { t: 'PrintOS Box — Recepción Automatizada', d: 'Tus clientes envían archivos directamente; validación automática, preflight y enrutamiento a producción.' },
-              { t: 'API Abierta — Sin Coste Adicional', d: 'Integración con MIS, ERP o web-to-print. Actualizaciones automáticas gestionadas por HP.' },
+              { t: 'Monitorización Web/Móvil', d: 'Controla el estado de la impresora, colas y consumos de forma remota.' },
+              { t: 'Análisis de Productividad', d: 'Datos históricos sobre rendimiento y eficiencia de la producción.' },
+              { t: 'Ecosistema Cloud', d: 'Acceso a perfiles de materiales y herramientas de gestión desde la nube.' },
+              { t: 'Integración de Flujo', d: 'Conectividad con software RIP y sistemas de gestión de impresión (MIS).' },
             ].map(({ t, d }, i) => (
               <div
                 key={i}
@@ -386,7 +386,7 @@ const Report: React.FC = () => {
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-400 mt-2 italic">* Roland, Mimaki y Epson no ofrecen un ecosistema cloud equivalente de forma gratuita integrada.</p>
+          <p className="text-xs text-gray-400 mt-2 italic">* Las funciones dependen del fabricante y el software RIP seleccionado.</p>
         </div>
 
         {/* ── SECCIÓN 6: SOSTENIBILIDAD ── */}
@@ -440,8 +440,8 @@ const Report: React.FC = () => {
           className="pt-4 border-t flex justify-between items-center text-xs text-gray-400"
           style={{ borderTopColor: HEX_COLORS.gray[200] }}
         >
-          <p>Digital Market · Partner Especialista HP Latex · <span className="font-bold">digital-market.es</span></p>
-          <p>Informe generado automáticamente por Calculadora DM</p>
+          <p>Digital Market · Especialistas en Impresión Gran Formato · <span className="font-bold">digital-market.es</span></p>
+          <p>Informe generado automáticamente por Comparador ROI DM</p>
         </div>
 
       </div>
