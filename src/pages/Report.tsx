@@ -6,7 +6,7 @@ import {
   ShieldCheck, Zap, Star, Building2,
 } from 'lucide-react';
 import GlowButton from '../components/GlowButton';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import { jsPDF } from 'jspdf';
 
 // ─── Paleta de colores fija para el PDF ───────────────────────────────────────
@@ -61,9 +61,10 @@ const Report: React.FC = () => {
     if (!reportRef.current) { setDownloading(false); return; }
     try {
       const canvas = await html2canvas(reportRef.current, {
-        scale: 2, useCORS: true, backgroundColor: '#ffffff',
+        scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff',
         windowWidth: reportRef.current.scrollWidth,
         windowHeight: reportRef.current.scrollHeight,
+        logging: false,
       });
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const imgWidth = 210;
