@@ -67,57 +67,63 @@ export const ALL_MACHINES: Machine[] = [
     certifications: ['GREENGUARD Gold', 'UL ECOLOGO', 'ENERGY STAR'],
   },
   // HP Latex 630 Print & Cut — Gen4, 1300mm, tinta HP 832 1L
+  // PVR oficial C!Print 2025: €21.990 sin renove. Velocidad outdoor: 18 m²/h.
   {
     brand: 'HP Latex', model: 'HP Latex 630 Print & Cut', technology: 'latex',
     printWidthMm: 1300, printSpeed: 18,
     inkPricePerLiter: 118, inkMlPerM2: 12, inkCostPerM2: ink(118, 12),
     weeklyMaintenance: 0, dryTimeHours: 0,
-    referencePrice: 19900, lifetimeYears: 7, residualValue: 2000, headCostAnnual: 200,
+    referencePrice: 21990, lifetimeYears: 7, residualValue: 2200, headCostAnnual: 200,
     certifications: ['GREENGUARD Gold', 'UL ECOLOGO', 'ENERGY STAR'],
   },
   // HP Latex 630W Print & Cut — Gen4, 1616mm, tinta HP 832 1L
+  // PVR oficial C!Print 2025: €23.990 sin renove. Velocidad outdoor: 18 m²/h.
   {
     brand: 'HP Latex', model: 'HP Latex 630W Print & Cut', technology: 'latex',
-    printWidthMm: 1616, printSpeed: 24,
+    printWidthMm: 1616, printSpeed: 18,
     inkPricePerLiter: 118, inkMlPerM2: 12, inkCostPerM2: ink(118, 12),
     weeklyMaintenance: 0, dryTimeHours: 0,
-    referencePrice: 22900, lifetimeYears: 7, residualValue: 2300, headCostAnnual: 200,
+    referencePrice: 23990, lifetimeYears: 7, residualValue: 2400, headCostAnnual: 200,
     certifications: ['GREENGUARD Gold', 'UL ECOLOGO', 'ENERGY STAR'],
   },
   // HP Latex 700W — producción Gen4, 1625mm, tinta HP 832 1L
+  // PVR oficial C!Print 2025: €28.890 sin renove. 31 m²/h outdoor.
   {
     brand: 'HP Latex', model: 'HP Latex 700W', technology: 'latex',
     printWidthMm: 1625, printSpeed: 31,
     inkPricePerLiter: 118, inkMlPerM2: 12, inkCostPerM2: ink(118, 12),
     weeklyMaintenance: 0, dryTimeHours: 0,
-    referencePrice: 25000, lifetimeYears: 8, residualValue: 2500, headCostAnnual: 200,
+    referencePrice: 28890, lifetimeYears: 8, residualValue: 2900, headCostAnnual: 200,
     certifications: ['GREENGUARD Gold', 'UL ECOLOGO', 'ENERGY STAR', 'EPEAT'],
   },
-  // HP Latex 730 — producción Gen4, 1625mm, tinta HP 832 1L
+  // HP Latex 730 — producción Gen5, 1625mm, tinta HP 832 1L (sustituto del 700 desde mayo 2025)
+  // Portfolio activo desde mayo 2025. Precio estimado similar al 700W.
   {
     brand: 'HP Latex', model: 'HP Latex 730', technology: 'latex',
     printWidthMm: 1625, printSpeed: 31,
     inkPricePerLiter: 118, inkMlPerM2: 12, inkCostPerM2: ink(118, 12),
     weeklyMaintenance: 0, dryTimeHours: 0,
-    referencePrice: 25000, lifetimeYears: 8, residualValue: 2500, headCostAnnual: 200,
+    referencePrice: 28890, lifetimeYears: 8, residualValue: 2900, headCostAnnual: 200,
     certifications: ['GREENGUARD Gold', 'UL ECOLOGO', 'ENERGY STAR'],
   },
   // HP Latex 800W — alta producción Gen4, 1625mm, tinta HP 873 3L (€91/L)
+  // PVR oficial C!Print 2025: €34.490 sin renove.
   {
     brand: 'HP Latex', model: 'HP Latex 800W', technology: 'latex',
     printWidthMm: 1625, printSpeed: 36,
     inkPricePerLiter: 91, inkMlPerM2: 12, inkCostPerM2: ink(91, 12),
     weeklyMaintenance: 0, dryTimeHours: 0,
-    referencePrice: 32000, lifetimeYears: 8, residualValue: 3500, headCostAnnual: 250,
+    referencePrice: 34490, lifetimeYears: 8, residualValue: 3500, headCostAnnual: 250,
     certifications: ['GREENGUARD Gold', 'UL ECOLOGO', 'ENERGY STAR', 'EPEAT'],
   },
-  // HP Latex 830 — alta producción Gen4, 1625mm, tinta HP 873 3L (€91/L)
+  // HP Latex 830 — alta producción Gen5, 1625mm, tinta HP 873 3L (€91/L) (sustituto del 800 desde mayo 2025)
+  // Portfolio activo desde mayo 2025. Precio estimado similar al 800W.
   {
     brand: 'HP Latex', model: 'HP Latex 830', technology: 'latex',
     printWidthMm: 1625, printSpeed: 36,
     inkPricePerLiter: 91, inkMlPerM2: 12, inkCostPerM2: ink(91, 12),
     weeklyMaintenance: 0, dryTimeHours: 0,
-    referencePrice: 32000, lifetimeYears: 8, residualValue: 3500, headCostAnnual: 250,
+    referencePrice: 34490, lifetimeYears: 8, residualValue: 3500, headCostAnnual: 250,
     certifications: ['GREENGUARD Gold', 'UL ECOLOGO', 'ENERGY STAR'],
   },
   // HP Latex 800MFP — con plegado y corte integrado, tinta HP 873 3L (€91/L)
@@ -126,13 +132,16 @@ export const ALL_MACHINES: Machine[] = [
     printWidthMm: 1625, printSpeed: 36,
     inkPricePerLiter: 91, inkMlPerM2: 12, inkCostPerM2: ink(91, 12),
     weeklyMaintenance: 0, dryTimeHours: 0,
-    referencePrice: 38000, lifetimeYears: 8, residualValue: 4000, headCostAnnual: 250,
+    referencePrice: 40000, lifetimeYears: 8, residualValue: 4000, headCostAnnual: 250,
     certifications: ['GREENGUARD Gold', 'UL ECOLOGO', 'ENERGY STAR', 'EPEAT'],
   },
-  // HP Latex R530 — rígido + rollo, 1616mm, tinta HP 832 1L (€118/L)
+  // HP Latex R530 — rígido + rollo, HP High Control Belt System, 1616mm, tinta HP 832 1L (€118/L)
+  // Modos: Borrador 31m²/h (8 planchas/h), Rápido 24m²/h (6/h), Estándar 15.5m²/h (4/h), Calidad 11.5m²/h (3/h)
+  // Espacio operativo reducido: 28.5m² (sin mesas plegables). Admite rígidos hasta 50mm espesor.
+  // Ahorro directo vs print+mount tradicional: ~€6-10/m² (vinilo + laminado + mano de obra montaje eliminados)
   {
     brand: 'HP Latex', model: 'HP Latex R530', technology: 'latex',
-    printWidthMm: 1616, printSpeed: 20,
+    printWidthMm: 1616, printSpeed: 24,
     inkPricePerLiter: 118, inkMlPerM2: 12, inkCostPerM2: ink(118, 12),
     weeklyMaintenance: 0, dryTimeHours: 0,
     referencePrice: 35000, lifetimeYears: 8, residualValue: 3500, headCostAnnual: 300,

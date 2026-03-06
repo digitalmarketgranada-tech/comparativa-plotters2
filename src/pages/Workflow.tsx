@@ -1,7 +1,12 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Clock, Users, Zap, BarChart3 } from 'lucide-react';
+import { Clock, Zap, Package, ArrowRight, CheckCircle2, XCircle, Layers, TrendingDown, Euro, Calculator } from 'lucide-react';
 import { useData, ALL_MACHINES } from '../context/DataContext';
+
+// Modelos que son mesas planas (UV flatbed) — no rollo a rollo
+const FLATBED_KEYWORDS = ['JFX', 'LEJ', 'Kudu', 'Nyala', 'Topi', 'Impala', 'Oryx', 'Anapurna', 'Jeti Tauro'];
+const isFlatbed = (model: string) => FLATBED_KEYWORDS.some(k => model.includes(k));
+const isR530model = (model: string) => model.includes('R530');
 
 const Workflow: React.FC = () => {
   const { data, results } = useData();
@@ -247,6 +252,329 @@ const Workflow: React.FC = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* ── Sección exclusiva: Print & Mount ROI (solo cuando R530 está en la comparativa) ── */}
+      {(isR530model(nameA) || isR530model(nameB)) && (() => {
+        // Cálculo basado en la herramienta oficial HP "Print and Mount Cost Calculator EMEA"
+        // Parámetros por defecto: vinilo €2.50/m², laminado €2.50/m² (70% planchas),
+        // montaje manual A0: 7 min/plancha, operario €20/h → total €6.58/m² extra
+        const VINYL_COST = 2.50;         // €/m²
+        const LAMINATE_COST = 2.50;      // €/m² (70% laminado)
+        const LAMINATE_RATE = 0.70;
+        const LABOR_RATE = 20;           // €/h operario
+        const MOUNT_MIN_PER_M2 = 7;      // min por plancha A0 (1m²) — HP Excel oficial
+
+        const vol = data.monthlyVolume || 150;
+        const vinyLaborMin = vol * MOUNT_MIN_PER_M2;
+        const vinyLaborH = vinyLaborMin / 60;
+        const vinyLaborCost = vinyLaborH * LABOR_RATE;
+        const vinylMaterialCost = vol * VINYL_COST;
+        const laminateCost = vol * LAMINATE_RATE * LAMINATE_COST;
+        const totalPrintMountSaving = Math.round(vinylMaterialCost + laminateCost + vinyLaborCost);
+        const savingPerM2 = (totalPrintMountSaving / vol);
+        const annualSaving = totalPrintMountSaving * 12;
+        const r530Price = 35000;
+        const paybackMonths = totalPrintMountSaving > 0 ? Math.ceil(r530Price / totalPrintMountSaving) : null;
+
+        const fmt = (v: number) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
+        const fmt2 = (v: number) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+            className="rounded-2xl overflow-hidden border border-emerald-200 shadow-sm"
+          >
+            {/* Header */}
+            <div className="bg-emerald-700 px-6 py-5 flex items-center gap-3">
+              <Calculator size={20} className="text-emerald-200" />
+              <div>
+                <h2 className="font-black text-white text-lg leading-tight">Ahorro Real con Impresión Directa en Rígido</h2>
+                <p className="text-emerald-200 text-xs mt-0.5">
+                  La HP R530 elimina el flujo print &amp; mount tradicional — datos de la herramienta oficial HP EMEA
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 space-y-6">
+
+              {/* Explicación del problema */}
+              <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
+                <p className="text-sm font-bold text-amber-800 mb-2">¿Qué es el flujo Print &amp; Mount?</p>
+                <p className="text-sm text-amber-700 leading-relaxed">
+                  La mayoría de talleres que no tienen impresora de rígido hacen: <strong>imprimir en vinilo
+                  autodesalvo → laminar → cortar → montar manualmente sobre el soporte rígido</strong>.
+                  Cada paso cuesta tiempo y material. La R530 <strong>elimina todo ese flujo</strong>
+                  imprimiendo directamente sobre la plancha rígida.
+                </p>
+              </div>
+
+              {/* Comparativa de flujos */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
+                  <p className="text-xs font-bold text-rose-500 uppercase mb-3">Sin HP R530 — Print &amp; Mount</p>
+                  <div className="space-y-2">
+                    {[
+                      { item: 'Vinilo autoadhesivo', cost: fmt2(VINYL_COST) + '/m²' },
+                      { item: `Laminado (${(LAMINATE_RATE * 100).toFixed(0)}% de planchas)`, cost: fmt2(LAMINATE_COST * LAMINATE_RATE) + '/m²' },
+                      { item: `Montaje manual (${MOUNT_MIN_PER_M2} min/m² × ${fmt(LABOR_RATE)}/h)`, cost: fmt2(MOUNT_MIN_PER_M2 / 60 * LABOR_RATE) + '/m²' },
+                    ].map((r, i) => (
+                      <div key={i} className="flex justify-between items-center text-sm">
+                        <span className="text-rose-700">{r.item}</span>
+                        <span className="font-black text-rose-600">{r.cost}</span>
+                      </div>
+                    ))}
+                    <div className="border-t border-rose-300 pt-2 flex justify-between items-center">
+                      <span className="font-black text-rose-800 text-sm">Coste extra total</span>
+                      <span className="font-black text-rose-600 text-lg">{fmt2(savingPerM2)}/m²</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                  <p className="text-xs font-bold text-emerald-500 uppercase mb-3">Con HP R530 — Impresión directa</p>
+                  <div className="space-y-2">
+                    {[
+                      { item: 'Vinilo autodesalvo', cost: '€0' },
+                      { item: 'Laminado', cost: '€0 (papel reciclable)' },
+                      { item: 'Montaje manual', cost: '€0 (impresión directa)' },
+                    ].map((r, i) => (
+                      <div key={i} className="flex justify-between items-center text-sm">
+                        <span className="text-emerald-700">{r.item}</span>
+                        <span className="font-black text-emerald-600">{r.cost}</span>
+                      </div>
+                    ))}
+                    <div className="border-t border-emerald-300 pt-2 flex justify-between items-center">
+                      <span className="font-black text-emerald-800 text-sm">Coste extra total</span>
+                      <span className="font-black text-emerald-600 text-lg">€0,00/m²</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Calculadora con volumen real del cliente */}
+              <div className="rounded-2xl bg-slate-900 p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Euro size={16} className="text-cyan-400" />
+                  <p className="text-sm font-bold text-white">
+                    Con los <span className="text-cyan-400">{vol} m²/mes</span> de tu cliente — ahorro estimado
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { label: 'Ahorro vinilo + laminado', value: fmt(vinylMaterialCost + laminateCost), sub: '/mes', color: 'text-amber-300' },
+                    { label: 'Ahorro mano de obra montaje', value: fmt(vinyLaborCost), sub: '/mes', color: 'text-cyan-300' },
+                    { label: 'Ahorro total mensual', value: fmt(totalPrintMountSaving), sub: '/mes', color: 'text-emerald-400' },
+                    { label: 'Ahorro anual', value: fmt(annualSaving), sub: '/año', color: 'text-emerald-300' },
+                  ].map(({ label, value, sub, color }) => (
+                    <div key={label} className="bg-white/8 rounded-xl p-3 text-center">
+                      <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">{label}</p>
+                      <p className={`text-xl font-black ${color}`}>{value}</p>
+                      <p className="text-[10px] text-slate-500">{sub}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {paybackMonths && (
+                  <div className="mt-4 rounded-xl bg-emerald-600/20 border border-emerald-500/30 px-4 py-3 flex items-center gap-3">
+                    <TrendingDown size={18} className="text-emerald-400 flex-shrink-0" />
+                    <p className="text-sm text-emerald-200">
+                      <strong className="text-emerald-300">Payback del R530 solo con el ahorro Print &amp; Mount:</strong>{' '}
+                      {paybackMonths} meses — sin contar el ahorro en costes de tinta ni mayor productividad.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Testimonios reales de clientes HP */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm italic text-slate-700 leading-relaxed">
+                    "La impresión directa en soportes rígidos nos ahorrará <strong>10 €/m²</strong>,
+                    contando el SAV, el laminado y la mano de obra para montar."
+                  </p>
+                  <p className="text-xs text-slate-500 mt-2 font-semibold">— GS Graphixx (Alemania) · Cliente HP Latex 365</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm italic text-slate-700 leading-relaxed">
+                    "Tenemos que hacer impresión en flexible y laminar en el <strong>40% de los proyectos</strong>
+                    con aplicaciones rígidas debido a la diferencia de calidad con el Mimaki JFX200."
+                  </p>
+                  <p className="text-xs text-slate-500 mt-2 font-semibold">— XL Print (Francia) · Ahora con R530</p>
+                </div>
+              </div>
+
+            </div>
+          </motion.div>
+        );
+      })()}
+
+      {/* ── Sección exclusiva: Mesas Planas ── */}
+      {(isFlatbed(nameA) || isFlatbed(nameB) || isR530model(nameA) || isR530model(nameB)) && (() => {
+        const hasFlatbedA = isFlatbed(nameA);
+        const hasFlatbedB = isFlatbed(nameB);
+        const hasR530A    = isR530model(nameA);
+        const hasR530B    = isR530model(nameB);
+        const flatbedName = hasFlatbedA ? shortA : hasFlatbedB ? shortB : null;
+        const r530Name    = hasR530A ? shortA : hasR530B ? shortB : null;
+
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+            className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm"
+          >
+            {/* Header */}
+            <div className="bg-slate-900 px-6 py-5 flex items-center gap-3">
+              <Layers size={20} className="text-cyan-400" />
+              <div>
+                <h2 className="font-black text-white text-lg leading-tight">Mesas Planas: Flujo de Trabajo Real</h2>
+                <p className="text-slate-400 text-xs mt-0.5">Carga manual vs cinta de arrastre continua</p>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 space-y-6">
+
+              {/* Comparativa visual de pasos */}
+              <div className="grid md:grid-cols-2 gap-5">
+
+                {/* — Mesa plana tradicional — */}
+                <div className="rounded-2xl border border-rose-200 bg-rose-50 overflow-hidden">
+                  <div className="bg-rose-600 px-4 py-3 flex items-center gap-2">
+                    <XCircle size={16} className="text-white" />
+                    <span className="text-white font-bold text-sm">
+                      {flatbedName ?? 'Mesa Plana UV'} — Carga Manual
+                    </span>
+                  </div>
+                  <div className="p-4 space-y-2">
+                    {[
+                      { icon: '📦', label: 'Colocar plancha', detail: 'El operario la posiciona y activa vacío', time: '~1–2 min', bad: false },
+                      { icon: '🖨️', label: 'Imprimir', detail: 'El cabezal recorre la plancha', time: 'variable', bad: false },
+                      { icon: '⏸️', label: 'Esperar retorno del cabezal', detail: 'El carro vuelve a posición inicial', time: '~30–60 s', bad: true },
+                      { icon: '📤', label: 'Retirar plancha impresa', detail: 'Desactivar vacío + retirar manualmente', time: '~1–2 min', bad: true },
+                      { icon: '🔁', label: 'Repetir desde el paso 1', detail: 'La máquina queda parada entre planchas', time: 'cada vez', bad: true },
+                    ].map((step, i) => (
+                      <div key={i} className={`flex items-start gap-3 rounded-xl px-3 py-2.5 ${step.bad ? 'bg-rose-100' : 'bg-white'}`}>
+                        <span className="text-xl leading-none mt-0.5">{step.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className={`text-sm font-bold ${step.bad ? 'text-rose-800' : 'text-gray-800'}`}>{step.label}</p>
+                            <span className={`text-[10px] font-black px-1.5 py-0.5 rounded whitespace-nowrap ${step.bad ? 'bg-rose-200 text-rose-700' : 'bg-gray-100 text-gray-500'}`}>{step.time}</span>
+                          </div>
+                          <p className="text-[11px] text-gray-500 mt-0.5">{step.detail}</p>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="mt-3 rounded-xl bg-rose-200/60 px-3 py-2.5 flex items-center gap-2">
+                      <Clock size={14} className="text-rose-700 flex-shrink-0" />
+                      <p className="text-xs font-bold text-rose-800">Tiempo muerto entre planchas: <span className="text-rose-600">3–5 minutos</span> — la máquina espera al operario</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* — HP R530 cinta de arrastre — */}
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 overflow-hidden">
+                  <div className="bg-emerald-600 px-4 py-3 flex items-center gap-2">
+                    <CheckCircle2 size={16} className="text-white" />
+                    <span className="text-white font-bold text-sm">
+                      {r530Name ?? 'HP Latex R530'} — Cinta de Arrastre
+                    </span>
+                  </div>
+                  <div className="p-4 space-y-2">
+                    {[
+                      { icon: '📦', label: 'Cargar primera plancha', detail: 'Se desliza sobre la cinta de arrastre', time: '~30 s', bad: false },
+                      { icon: '🖨️', label: 'Imprimir en movimiento', detail: 'La cinta avanza mientras imprime', time: 'continuo', bad: false },
+                      { icon: '➡️', label: 'Insertar siguiente plancha', detail: 'Se introduce POR DETRÁS mientras la anterior sigue imprimiéndose', time: 'simultáneo', bad: false },
+                      { icon: '✅', label: 'Plancha sale lista por delante', detail: 'Sin retorno de cabezal, sin espera', time: '0 s muerto', bad: false },
+                      { icon: '🔄', label: 'Flujo continuo sin paradas', detail: 'El operario solo alimenta; la máquina nunca para', time: 'siempre activa', bad: false },
+                    ].map((step, i) => (
+                      <div key={i} className="flex items-start gap-3 rounded-xl px-3 py-2.5 bg-white">
+                        <span className="text-xl leading-none mt-0.5">{step.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-bold text-gray-800">{step.label}</p>
+                            <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 whitespace-nowrap">{step.time}</span>
+                          </div>
+                          <p className="text-[11px] text-gray-500 mt-0.5">{step.detail}</p>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="mt-3 rounded-xl bg-emerald-200/60 px-3 py-2.5 flex items-center gap-2">
+                      <Zap size={14} className="text-emerald-700 flex-shrink-0" />
+                      <p className="text-xs font-bold text-emerald-800">Tiempo muerto entre planchas: <span className="text-emerald-600">≈ 0 — flujo continuo</span></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Diagrama animado de cinta */}
+              <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Diagrama — Cinta de Arrastre HP R530</p>
+                <div className="flex items-center gap-1 overflow-x-auto pb-2">
+                  {/* Operario carga */}
+                  <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
+                    <div className="w-16 h-10 rounded-lg bg-slate-200 border border-slate-300 flex items-center justify-center">
+                      <Package size={18} className="text-slate-500" />
+                    </div>
+                    <p className="text-[9px] text-slate-500 font-bold text-center">CARGA</p>
+                  </div>
+                  <ArrowRight size={14} className="text-slate-400 flex-shrink-0" />
+                  {/* Plancha 3 - entrando */}
+                  <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
+                    <div className="w-20 h-10 rounded-lg bg-amber-100 border-2 border-amber-300 flex items-center justify-center">
+                      <p className="text-[10px] font-black text-amber-700">Plancha 3</p>
+                    </div>
+                    <p className="text-[9px] text-amber-600 font-bold">entrando</p>
+                  </div>
+                  <ArrowRight size={14} className="text-slate-400 flex-shrink-0" />
+                  {/* Zona de impresión */}
+                  <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
+                    <div className="w-24 h-10 rounded-lg bg-cyan-100 border-2 border-cyan-400 flex items-center justify-center gap-1">
+                      <p className="text-[10px] font-black text-cyan-700">🖨️ Plancha 2</p>
+                    </div>
+                    <p className="text-[9px] text-cyan-600 font-bold text-center">IMPRIMIENDO</p>
+                  </div>
+                  <ArrowRight size={14} className="text-slate-400 flex-shrink-0" />
+                  {/* Plancha 1 saliendo */}
+                  <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
+                    <div className="w-20 h-10 rounded-lg bg-emerald-100 border-2 border-emerald-400 flex items-center justify-center">
+                      <p className="text-[10px] font-black text-emerald-700">✅ Plancha 1</p>
+                    </div>
+                    <p className="text-[9px] text-emerald-600 font-bold">lista</p>
+                  </div>
+                  <ArrowRight size={14} className="text-slate-400 flex-shrink-0" />
+                  {/* Salida */}
+                  <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
+                    <div className="w-16 h-10 rounded-lg bg-emerald-200 border border-emerald-300 flex items-center justify-center">
+                      <CheckCircle2 size={18} className="text-emerald-600" />
+                    </div>
+                    <p className="text-[9px] text-emerald-600 font-bold text-center">SALIDA</p>
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-3">Tres planchas en la cinta simultáneamente: una entrando, una imprimiéndose, una saliendo lista.</p>
+              </div>
+
+              {/* Impacto real en producción */}
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="rounded-xl bg-rose-50 border border-rose-200 p-4 text-center">
+                  <p className="text-xs text-rose-500 font-bold uppercase mb-1">Mesa Plana — Tiempo muerto</p>
+                  <p className="text-3xl font-black text-rose-600">3–5 min</p>
+                  <p className="text-[11px] text-rose-500 mt-1">por plancha entre carga y descarga</p>
+                </div>
+                <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-center">
+                  <p className="text-xs text-emerald-500 font-bold uppercase mb-1">HP R530 — Tiempo muerto</p>
+                  <p className="text-3xl font-black text-emerald-600">≈ 0</p>
+                  <p className="text-[11px] text-emerald-500 mt-1">cinta continua, sin paradas entre planchas</p>
+                </div>
+                <div className="rounded-xl bg-slate-800 border border-slate-700 p-4 text-center">
+                  <p className="text-xs text-slate-400 font-bold uppercase mb-1">En jornada de 8h</p>
+                  <p className="text-2xl font-black text-cyan-400">+30–40%</p>
+                  <p className="text-[11px] text-slate-400 mt-1">más planchas producidas con la cinta vs carga manual</p>
+                </div>
+              </div>
+
+            </div>
+          </motion.div>
+        );
+      })()}
     </div>
   );
 };
