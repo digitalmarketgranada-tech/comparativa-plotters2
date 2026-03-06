@@ -263,6 +263,28 @@ export const ALL_MACHINES: Machine[] = [
     certifications: [],
   },
 
+  // ── Roland VersaUV (mesas planas UV) ─────────────────────────────────────
+  // Tinta ECO-UV 220ml (~€480/L). Curado UV-LED instantáneo. GREENGUARD Gold.
+  // LEJ-640FT — plano puro 1606×2490mm (63"×96"), hasta 12 m²/h, hasta 150mm espesor y 100kg
+  {
+    brand: 'Roland', model: 'VersaUV LEJ-640FT', technology: 'uv',
+    printWidthMm: 1606, printSpeed: 12,
+    inkPricePerLiter: 480, inkMlPerM2: 8, inkCostPerM2: ink(480, 8),
+    weeklyMaintenance: 2.0, dryTimeHours: 0,
+    referencePrice: 45000, lifetimeYears: 8, residualValue: 4500, headCostAnnual: 1500,
+    certifications: ['GREENGUARD Gold'],
+  },
+  // LEJ-640 — híbrido plano+rollo 1625mm, hasta 12 m²/h, hasta 12mm espesor
+  // Formato directo competidor del HP R530: imprime en rígido y en rollo, misma anchura
+  {
+    brand: 'Roland', model: 'VersaUV LEJ-640', technology: 'uv',
+    printWidthMm: 1625, printSpeed: 12,
+    inkPricePerLiter: 480, inkMlPerM2: 8, inkCostPerM2: ink(480, 8),
+    weeklyMaintenance: 2.0, dryTimeHours: 0,
+    referencePrice: 40000, lifetimeYears: 8, residualValue: 4000, headCostAnnual: 1500,
+    certifications: ['GREENGUARD Gold'],
+  },
+
   // ── Mimaki ────────────────────────────────────────────────────────────────
   {
     brand: 'Mimaki', model: 'CJV150-75', technology: 'eco-solvent',
@@ -320,6 +342,30 @@ export const ALL_MACHINES: Machine[] = [
     inkPricePerLiter: 65, inkMlPerM2: 8, inkCostPerM2: ink(65, 8),
     weeklyMaintenance: 1.5, dryTimeHours: 0,
     referencePrice: 65000, lifetimeYears: 8, residualValue: 7000, headCostAnnual: 700,
+    certifications: ['GREENGUARD Gold'],
+  },
+
+  // ── Mimaki mesas planas UV (flatbeds) ─────────────────────────────────────
+  // Tinta LUS-120 / LUS-150 / LUS-200 flexible UV. GREENGUARD Gold certificada.
+  // JFX200-2513 EX — plano 2500×1300mm (4'×8'), hasta 35 m²/h, 3 cabezales escalón
+  // LUS-120/150 flexible, 2.5D Texture Maker, MSRP ~70.000€. Espesor hasta 50mm.
+  {
+    brand: 'Mimaki', model: 'JFX200-2513 EX', technology: 'uv',
+    printWidthMm: 2500, printSpeed: 35,
+    inkPricePerLiter: 140, inkMlPerM2: 8, inkCostPerM2: ink(140, 8),
+    weeklyMaintenance: 2.0, dryTimeHours: 0,
+    referencePrice: 70000, lifetimeYears: 8, residualValue: 7000, headCostAnnual: 1200,
+    certifications: ['GREENGUARD Gold'],
+  },
+  // JFX600-2513 — plano 2500×1300mm, 16 cabezales industriales, hasta 200 m²/h
+  // El flatbed UV de mayor producción de Mimaki. LUS-200/170 flexible. ~190.000€.
+  // 67 tableros/hora (4'×8'). Espesor hasta 60mm. Industry 4.0 ready.
+  {
+    brand: 'Mimaki', model: 'JFX600-2513', technology: 'uv',
+    printWidthMm: 2500, printSpeed: 200,
+    inkPricePerLiter: 160, inkMlPerM2: 8, inkCostPerM2: ink(160, 8),
+    weeklyMaintenance: 2.5, dryTimeHours: 0,
+    referencePrice: 190000, lifetimeYears: 8, residualValue: 25000, headCostAnnual: 3000,
     certifications: ['GREENGUARD Gold'],
   },
 
