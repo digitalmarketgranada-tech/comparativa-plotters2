@@ -644,7 +644,7 @@ const RIGID_KEYWORDS = [
   'Kudu', 'Nyala', 'Topi', 'Impala', 'Oryx',
   'JFX', 'LEJ',
 ];
-const HYBRID_KEYWORDS = ['R530', 'UJ-330H', 'Karibu'];
+const HYBRID_KEYWORDS = ['R530', 'R1000', 'R2000', 'UJ-330H', 'Karibu'];
 
 export function getMachineSegment(m: Machine): 'flexible' | 'rigid' | 'hybrid' {
   const key = `${m.brand} ${m.model}`;
