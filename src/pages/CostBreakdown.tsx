@@ -55,9 +55,6 @@ const CostBreakdown: React.FC = () => {
   const bOpCost = (bPrintH + data.machineBMaintenance * 4) * 20;
   const bWaitCost = data.machineBDryTime > 0 ? (volB / 50) * 0.5 * 20 : 0;
 
-  const monthlySavings = results.machineACost - results.machineBCost;
-  const annualSavings = monthlySavings * 12;
-
   // Datos para gráfica de barras (desglose mensual)
   const monthlyComparison = [
     { name: 'Tinta', A: Math.round(aInkCost), B: Math.round(bInkCost) },
@@ -203,7 +200,7 @@ const CostBreakdown: React.FC = () => {
           <div className="px-5 py-3 bg-emerald-50 border-t border-emerald-100 flex items-center gap-2">
             <TrendingUp size={14} className="text-emerald-600 flex-shrink-0" />
             <p className="text-sm text-emerald-800">
-              <strong>Payback real: {payback.toFixed(1)} meses</strong> — El ahorro TCO mensual ({fmt(tcoSaving)}) amortiza la inversión en HP Latex ({fmt(data.machineBPrice)}) en ese plazo.
+              <strong>Payback real: {payback.toFixed(1)} meses</strong> — El ahorro TCO mensual ({fmt(tcoSaving)}) amortiza la inversión en {shortB} ({fmt(data.machineBPrice)}) en ese plazo.
             </p>
           </div>
         )}
@@ -255,40 +252,6 @@ const CostBreakdown: React.FC = () => {
             </ResponsiveContainer>
           )}
 
-          {/* Tabla resumen 5 años */}
-          {results.yearlyData && results.yearlyData.length > 0 && (
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="text-left px-3 py-2 text-gray-400 font-bold uppercase">Año</th>
-                    <th className="text-right px-3 py-2 text-indigo-500 font-bold uppercase">Benef. A</th>
-                    <th className="text-right px-3 py-2 text-amber-600 font-bold uppercase">Benef. B</th>
-                    <th className="text-right px-3 py-2 text-indigo-400 font-bold uppercase">Acum. A</th>
-                    <th className="text-right px-3 py-2 text-amber-500 font-bold uppercase">Acum. B</th>
-                    <th className="text-right px-3 py-2 text-emerald-600 font-bold uppercase">Ventaja B</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {results.yearlyData.map(d => {
-                    const advantage = d.cumProfitB - d.cumProfitA;
-                    return (
-                      <tr key={d.year} className="bg-white hover:bg-gray-50">
-                        <td className="px-3 py-2 font-bold text-gray-700">Año {d.year}</td>
-                        <td className={`px-3 py-2 text-right font-semibold ${d.profitA >= 0 ? 'text-gray-700' : 'text-rose-500'}`}>{fmt(d.profitA)}</td>
-                        <td className={`px-3 py-2 text-right font-semibold ${d.profitB >= 0 ? 'text-gray-700' : 'text-rose-500'}`}>{fmt(d.profitB)}</td>
-                        <td className={`px-3 py-2 text-right font-bold ${d.cumProfitA >= 0 ? 'text-indigo-600' : 'text-rose-500'}`}>{fmt(d.cumProfitA)}</td>
-                        <td className={`px-3 py-2 text-right font-bold ${d.cumProfitB >= 0 ? 'text-amber-600' : 'text-rose-500'}`}>{fmt(d.cumProfitB)}</td>
-                        <td className={`px-3 py-2 text-right font-black ${advantage >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                          {advantage >= 0 ? '+' : ''}{fmt(advantage)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
       </motion.div>
 
@@ -363,29 +326,6 @@ const CostBreakdown: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* ── Resumen ahorro operativo ── */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-gray-200 p-5">
-        <h3 className="font-black text-gray-900 mb-4">Resumen Ahorro Operativo (sin amortización)</h3>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="border-l-4 border-indigo-400 pl-4">
-            <p className="text-xs text-gray-400 uppercase font-bold mb-1">Coste operativo mensual A</p>
-            <p className="text-2xl font-black text-gray-900">{fmt(results.machineACost)}</p>
-            <p className="text-xs text-indigo-600 mt-1 font-medium">{shortA}</p>
-          </div>
-          <div className="border-l-4 border-amber-400 pl-4">
-            <p className="text-xs text-gray-400 uppercase font-bold mb-1">Coste operativo mensual B</p>
-            <p className="text-2xl font-black text-gray-900">{fmt(results.machineBCost)}</p>
-            <p className="text-xs text-amber-600 mt-1 font-medium">{shortB}</p>
-          </div>
-          <div className="border-l-4 border-emerald-400 pl-4">
-            <p className="text-xs text-gray-400 uppercase font-bold mb-1">Ahorro operativo mensual</p>
-            <p className={`text-2xl font-black ${monthlySavings >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-              {fmt(monthlySavings)}/mes
-            </p>
-            <p className="text-xs text-gray-500 mt-1">ROI operativo: {isFinite(results.roiMonths) ? `${results.roiMonths.toFixed(1)} meses` : '—'}</p>
-          </div>
-        </div>
-      </motion.div>
     </div>
   );
 };
