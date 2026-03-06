@@ -38,7 +38,6 @@ const Report: React.FC = () => {
   const inkB = results.inkCostPerM2B || data.machineBInkCost;
   const tcoSaving = results.tcoSavingsMonthly || 0;
   const payback = results.paybackMonthsTCO;
-  const roiOk = (results.machineBNetProfit || 0) >= (results.machineAProfit || 0);
   const rentingCoversRatio = results.monthlyRentingQuota > 0 ? tcoSaving / results.monthlyRentingQuota : 0;
   const volB = data.monthlyVolume * (1 + (data.growthRate || 0));
 
@@ -60,23 +59,49 @@ const Report: React.FC = () => {
     setDownloading(true);
     if (!reportRef.current) { setDownloading(false); return; }
     try {
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff',
-        windowWidth: reportRef.current.scrollWidth,
-        windowHeight: reportRef.current.scrollHeight,
-        logging: false,
-      });
+      const PAGE_W  = 210;
+      const PAGE_H  = 297;
+      const MARGIN  = 10;
+      const CONTENT_W = PAGE_W - MARGIN * 2;
+      const GAP_MM  = 4; // espacio entre secciones
+
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const imgData = canvas.toDataURL('image/png', 1.0);
-      let yPos = 0;
-      const pageHeight = 297;
-      while (yPos < imgHeight) {
-        if (yPos > 0) pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, -yPos, imgWidth, imgHeight, undefined, 'FAST');
-        yPos += pageHeight;
+      const sections = Array.from(reportRef.current.children) as HTMLElement[];
+      let curY = MARGIN;
+
+      for (let i = 0; i < sections.length; i++) {
+        const canvas = await html2canvas(sections[i], {
+          scale: 2, useCORS: true, allowTaint: true,
+          backgroundColor: '#ffffff', logging: false,
+        });
+        const secH   = (canvas.height / canvas.width) * CONTENT_W;
+        const imgData = canvas.toDataURL('image/png', 0.92);
+
+        // Si la sección no cabe en el espacio restante, salto de página
+        if (i > 0 && curY + secH > PAGE_H - MARGIN) {
+          pdf.addPage();
+          curY = MARGIN;
+        }
+
+        // Colocar la sección en la página actual.
+        // Si por sí sola es más alta que una página, se parte dentro de ella
+        // (mucho mejor que partir entre secciones distintas).
+        let placed = 0;
+        while (placed < secH) {
+          const pageRemaining = PAGE_H - MARGIN - curY;
+          const thisPart = Math.min(secH - placed, pageRemaining);
+          // addImage coloca la imagen entera pero el área visible es la de la página actual
+          pdf.addImage(imgData, 'PNG', MARGIN, curY - placed, CONTENT_W, secH, undefined, 'FAST');
+          placed += thisPart;
+          if (placed < secH) {
+            pdf.addPage();
+            curY = MARGIN;
+          } else {
+            curY += thisPart + GAP_MM;
+          }
+        }
       }
+
       const clientSlug = data.clientCompany ? `_${data.clientCompany.replace(/\s+/g, '_')}` : '';
       pdf.save(`Informe_ROI_DM${clientSlug}_${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch (err) {
@@ -262,89 +287,169 @@ const Report: React.FC = () => {
         </div>
 
         {/* ── SECCIÓN 4: TCO COMPARATIVA ── */}
-        <div>
-          <SectionTitle icon={Euro} label="Comparativa TCO Mensual Completa" />
-          <div className="mt-3 rounded-xl border overflow-hidden" style={{ borderColor: C.gray[200] }}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b" style={{ backgroundColor: C.gray[100], borderBottomColor: C.gray[200] }}>
-                  <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase w-1/2">Concepto</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: C.rose[400] }}>Máquina A</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: C.sky[600] }}>Máquina B (HP)</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: C.emerald[600] }}>Ahorro</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                <tr className="bg-white">
-                  <td className="px-4 py-3 text-gray-700">Ventas estimadas</td>
-                  <td className="px-4 py-3 text-right font-bold text-gray-900">{fc(results.monthlyRevenue)}</td>
-                  <td className="px-4 py-3 text-right font-bold text-gray-900">{fc(results.monthlyRevenueB || results.monthlyRevenue)}</td>
-                  <td className="px-4 py-3 text-right" style={{ color: (data.growthRate || 0) > 0 ? C.emerald[600] : C.gray[400] }}>
-                    {(data.growthRate || 0) > 0 ? `+${fc((results.monthlyRevenueB || 0) - results.monthlyRevenue)}` : '—'}
-                  </td>
-                </tr>
-                <tr style={{ backgroundColor: C.gray[50] }}>
-                  <td className="px-4 py-3 text-gray-700">Costes operativos (tinta + operario + esperas)</td>
-                  <td className="px-4 py-3 text-right font-bold" style={{ color: C.rose[600] }}>−{fc(results.machineACost)}</td>
-                  <td className="px-4 py-3 text-right font-bold" style={{ color: C.emerald[600] }}>−{fc(results.machineBCost)}</td>
-                  <td className="px-4 py-3 text-right font-bold" style={{ color: results.monthlySavings > 0 ? C.emerald[600] : C.rose[600] }}>
-                    {results.monthlySavings > 0 ? '+' : ''}{fc(results.monthlySavings)}
-                  </td>
-                </tr>
-                <tr className="bg-white">
-                  <td className="px-4 py-3 text-gray-700">Coste cabezales/mes</td>
-                  <td className="px-4 py-3 text-right font-bold" style={{ color: C.orange[600] }}>−{fc(data.machineAHeadCostMonthly || 0)}</td>
-                  <td className="px-4 py-3 text-right font-bold" style={{ color: C.emerald[600] }}>−{fc(data.machineBHeadCostMonthly || 0)}</td>
-                  <td className="px-4 py-3 text-right font-bold" style={{ color: (data.machineAHeadCostMonthly || 0) > (data.machineBHeadCostMonthly || 0) ? C.emerald[600] : C.rose[600] }}>
-                    +{fc((data.machineAHeadCostMonthly || 0) - (data.machineBHeadCostMonthly || 0))}
-                  </td>
-                </tr>
-                <tr style={{ backgroundColor: C.gray[50] }}>
-                  <td className="px-4 py-3 text-gray-700">Amortización mensual</td>
-                  <td className="px-4 py-3 text-right font-bold text-gray-600">−{fc(results.machineAAmortizationMonthly || 0)}</td>
-                  <td className="px-4 py-3 text-right font-bold text-gray-600">−{fc(results.machineBAmortizationMonthly || 0)}</td>
-                  <td className="px-4 py-3 text-right font-bold" style={{ color: (results.machineAAmortizationMonthly || 0) > (results.machineBAmortizationMonthly || 0) ? C.emerald[600] : C.gray[500] }}>
-                    {((results.machineAAmortizationMonthly || 0) - (results.machineBAmortizationMonthly || 0)) >= 0 ? '+' : ''}{fc((results.machineAAmortizationMonthly || 0) - (results.machineBAmortizationMonthly || 0))}
-                  </td>
-                </tr>
-                <tr className="border-t-2" style={{ backgroundColor: tcoSaving > 0 ? C.emerald[50] : C.sky[50], borderTopColor: C.gray[200] }}>
-                  <td className="px-4 py-3 font-black text-gray-900">AHORRO TCO TOTAL MENSUAL</td>
-                  <td className="px-4 py-3 text-right font-black" style={{ color: C.rose[600] }}>{fc(results.monthlyTCO_A || 0)}</td>
-                  <td className="px-4 py-3 text-right font-black text-xl" style={{ color: C.sky[600] }}>{fc(results.monthlyTCO_B || 0)}</td>
-                  <td className="px-4 py-3 text-right font-black text-xl" style={{ color: tcoSaving > 0 ? C.emerald[600] : C.rose[600] }}>
-                    {tcoSaving > 0 ? '+' : ''}{fc(tcoSaving)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        {(() => {
+          const shortNameA = (machineA?.model ?? data.machineAModel).length > 18
+            ? (machineA?.model ?? data.machineAModel).slice(0, 18) + '…'
+            : (machineA?.model ?? data.machineAModel);
+          const shortNameB = (machineB?.model ?? data.machineBModel).length > 18
+            ? (machineB?.model ?? data.machineBModel).slice(0, 18) + '…'
+            : (machineB?.model ?? data.machineBModel);
 
-          {/* Financiación */}
-          <div className="mt-3 rounded-xl border overflow-hidden" style={{ backgroundColor: C.amber[50], borderColor: C.amber[200] }}>
-            <div className="px-4 py-2 text-xs font-black uppercase tracking-wider" style={{ color: C.amber[700] }}>
-              Condiciones de Financiación (Renting Máquina B)
-            </div>
-            <div className="p-4 grid md:grid-cols-4 gap-4">
-              <DataRow label="Precio" value={fc(data.machineBPrice)} />
-              <DataRow label="Plazo" value={`${data.rentingMonths} meses`} />
-              <DataRow label="Interés" value={`${data.rentingInterest}%`} />
-              <DataRow label="Cuota mensual" value={fc(results.monthlyRentingQuota)} highlight="amber" />
-            </div>
-          </div>
+          const netA = results.machineATCONetProfit || 0;  // Ventas A − TCO A
+          const netB = results.machineBTCONetProfit || 0;  // Ventas B − TCO B
+          const netAdvantage = netB - netA;                // Beneficio neto adicional con B
 
-          {/* Nota ROI */}
-          <div className="mt-3 rounded-xl p-4 flex gap-3 border"
-            style={{ backgroundColor: roiOk ? C.emerald[50] : C.sky[50], borderColor: roiOk ? C.emerald[200] : C.sky[200] }}>
-            {roiOk
-              ? <CheckCircle style={{ color: C.emerald[600] }} className="flex-shrink-0 mt-0.5" size={18} />
-              : <AlertTriangle style={{ color: C.sky[600] }} className="flex-shrink-0 mt-0.5" size={18} />}
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {roiOk
-                ? <><strong>La máquina se paga sola:</strong> El ahorro TCO ({fc(tcoSaving)}/mes) cubre la cuota de financiación ({fc(results.monthlyRentingQuota)}/mes) con un excedente de <strong style={{ color: C.emerald[600] }}>{fc(tcoSaving - results.monthlyRentingQuota)}/mes</strong>.</>
-                : <><strong>El ahorro operativo ({fc(results.monthlySavings)}/mes)</strong> no cubre íntegramente la cuota ({fc(results.monthlyRentingQuota)}/mes). La diferencia de {fc(results.monthlyRentingQuota - results.monthlySavings)}/mes se recupera con <strong>mayor capacidad productiva</strong> (secado instantáneo, más trabajos posibles) y nuevas aplicaciones de mercado.</>}
-            </p>
-          </div>
-        </div>
+          const amortDiff = (results.machineAAmortizationMonthly || 0) - (results.machineBAmortizationMonthly || 0);
+          const headDiff = (data.machineAHeadCostMonthly || 0) - (data.machineBHeadCostMonthly || 0);
+
+          return (
+            <div>
+              <SectionTitle icon={Euro} label="Comparativa TCO Mensual Completa" />
+              <div className="mt-3 rounded-xl border overflow-hidden" style={{ borderColor: C.gray[200] }}>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b" style={{ backgroundColor: C.gray[100], borderBottomColor: C.gray[200] }}>
+                      <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase w-2/5">Concepto</th>
+                      <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: C.rose[400] }}>{shortNameA} (actual)</th>
+                      <th className="text-right px-4 py-3 text-xs font-bold uppercase" style={{ color: C.sky[600] }}>{shortNameB} (propuesta)</th>
+                      <th className="text-right px-4 py-3 text-xs font-bold text-gray-400 uppercase">Diferencia</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {/* Ingresos */}
+                    <tr className="bg-white">
+                      <td className="px-4 py-3 text-gray-700">
+                        Ventas estimadas
+                        {(data.growthRate || 0) > 0 && <span className="ml-1 text-[10px] text-emerald-600 font-bold">(+{((data.growthRate || 0) * 100).toFixed(0)}% vol. B)</span>}
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold text-gray-900">{fc(results.monthlyRevenue)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-gray-900">{fc(results.monthlyRevenueB || results.monthlyRevenue)}</td>
+                      <td className="px-4 py-3 text-right font-semibold" style={{ color: (data.growthRate || 0) > 0 ? C.emerald[600] : C.gray[400] }}>
+                        {(data.growthRate || 0) > 0 ? `+${fc((results.monthlyRevenueB || 0) - results.monthlyRevenue)}` : '—'}
+                      </td>
+                    </tr>
+                    {/* Costes operativos */}
+                    <tr style={{ backgroundColor: C.gray[50] }}>
+                      <td className="px-4 py-3 text-gray-700">Costes operativos (tinta + operario + esperas)</td>
+                      <td className="px-4 py-3 text-right font-bold" style={{ color: C.rose[600] }}>−{fc(results.machineACost)}</td>
+                      <td className="px-4 py-3 text-right font-bold" style={{ color: results.machineBCost < results.machineACost ? C.emerald[600] : C.rose[600] }}>
+                        −{fc(results.machineBCost)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold" style={{ color: results.monthlySavings > 0 ? C.emerald[600] : C.rose[600] }}>
+                        {results.monthlySavings > 0 ? `+${fc(results.monthlySavings)}` : fc(results.monthlySavings)}
+                      </td>
+                    </tr>
+                    {/* Cabezales */}
+                    <tr className="bg-white">
+                      <td className="px-4 py-3 text-gray-700">Coste cabezales/mes</td>
+                      <td className="px-4 py-3 text-right font-bold" style={{ color: C.orange[600] }}>−{fc(data.machineAHeadCostMonthly || 0)}</td>
+                      <td className="px-4 py-3 text-right font-bold" style={{ color: (data.machineBHeadCostMonthly || 0) <= (data.machineAHeadCostMonthly || 0) ? C.emerald[600] : C.rose[600] }}>
+                        −{fc(data.machineBHeadCostMonthly || 0)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold" style={{ color: headDiff >= 0 ? C.emerald[600] : C.rose[600] }}>
+                        {headDiff >= 0 ? `+${fc(headDiff)}` : fc(headDiff)}
+                      </td>
+                    </tr>
+                    {/* Amortización */}
+                    <tr style={{ backgroundColor: C.gray[50] }}>
+                      <td className="px-4 py-3 text-gray-700">Amortización mensual <span className="text-[10px] text-gray-400">(precio ÷ vida útil)</span></td>
+                      <td className="px-4 py-3 text-right font-bold text-gray-600">−{fc(results.machineAAmortizationMonthly || 0)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-gray-600">−{fc(results.machineBAmortizationMonthly || 0)}</td>
+                      <td className="px-4 py-3 text-right font-semibold" style={{ color: amortDiff >= 0 ? C.emerald[600] : C.gray[500] }}>
+                        {amortDiff >= 0 ? `+${fc(amortDiff)}` : fc(amortDiff)}
+                      </td>
+                    </tr>
+                    {/* TCO total */}
+                    <tr className="border-t-2" style={{ backgroundColor: C.gray[100], borderTopColor: C.gray[300] }}>
+                      <td className="px-4 py-3 font-black text-gray-700 text-xs uppercase tracking-wide">TCO total mensual (suma de costes)</td>
+                      <td className="px-4 py-3 text-right font-black text-base" style={{ color: C.rose[600] }}>{fc(results.monthlyTCO_A || 0)}</td>
+                      <td className="px-4 py-3 text-right font-black text-base" style={{ color: C.sky[700] }}>{fc(results.monthlyTCO_B || 0)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-sm" style={{ color: tcoSaving > 0 ? C.emerald[600] : C.rose[600] }}>
+                        {tcoSaving > 0
+                          ? <><span className="text-[10px] text-gray-400 block">B cuesta menos</span>+{fc(tcoSaving)}</>
+                          : <><span className="text-[10px] text-gray-400 block">B cuesta más</span>{fc(tcoSaving)}</>
+                        }
+                      </td>
+                    </tr>
+                    {/* Beneficio neto */}
+                    <tr className="border-t-2" style={{ backgroundColor: netAdvantage >= 0 ? C.emerald[50] : C.rose[50], borderTopColor: C.gray[200] }}>
+                      <td className="px-4 py-3 font-black text-gray-900">
+                        Beneficio neto mensual
+                        <span className="block text-[10px] font-normal text-gray-500">Ventas − TCO total</span>
+                      </td>
+                      <td className="px-4 py-3 text-right font-black text-lg" style={{ color: netA >= 0 ? C.gray[700] : C.rose[600] }}>{fc(netA)}</td>
+                      <td className="px-4 py-3 text-right font-black text-lg" style={{ color: netB >= 0 ? C.sky[700] : C.rose[600] }}>{fc(netB)}</td>
+                      <td className="px-4 py-3 text-right font-black text-xl" style={{ color: netAdvantage >= 0 ? C.emerald[600] : C.rose[600] }}>
+                        {netAdvantage >= 0 ? `+${fc(netAdvantage)}` : fc(netAdvantage)}
+                        <span className="block text-[10px] font-bold" style={{ color: netAdvantage >= 0 ? C.emerald[600] : C.rose[600] }}>
+                          {netAdvantage >= 0 ? 'B más rentable' : 'A más rentable'}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Financiación */}
+              <div className="mt-3 rounded-xl border overflow-hidden" style={{ backgroundColor: C.amber[50], borderColor: C.amber[200] }}>
+                <div className="px-4 py-2 text-xs font-black uppercase tracking-wider" style={{ color: C.amber[700] }}>
+                  Condiciones de Financiación (Renting {shortNameB})
+                </div>
+                <div className="p-4 grid md:grid-cols-4 gap-4">
+                  <DataRow label="Precio" value={fc(data.machineBPrice)} />
+                  <DataRow label="Plazo" value={`${data.rentingMonths} meses`} />
+                  <DataRow label="Interés" value={`${data.rentingInterest}%`} />
+                  <DataRow label="Cuota mensual" value={fc(results.monthlyRentingQuota)} highlight="amber" />
+                </div>
+              </div>
+
+              {/* Nota ROI */}
+              {(() => {
+                if (tcoSaving > 0 && results.monthlyRentingQuota > 0) {
+                  // B es más barata en TCO — el ahorro cubre la cuota
+                  const surplus = tcoSaving - results.monthlyRentingQuota;
+                  return (
+                    <div className="mt-3 rounded-xl p-4 flex gap-3 border" style={{ backgroundColor: C.emerald[50], borderColor: C.emerald[200] }}>
+                      <CheckCircle style={{ color: C.emerald[600] }} className="flex-shrink-0 mt-0.5" size={18} />
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        <strong>El ahorro en costes cubre la cuota de renting:</strong>{' '}
+                        {shortNameB} es {fc(tcoSaving)}/mes más barata en TCO.
+                        Cuota de financiación: {fc(results.monthlyRentingQuota)}/mes.{' '}
+                        {surplus > 0
+                          ? <>Excedente neto: <strong style={{ color: C.emerald[600] }}>+{fc(surplus)}/mes</strong> — la máquina se paga sola con el ahorro.</>
+                          : <>El ahorro cubre prácticamente la cuota de renting.</>}
+                      </p>
+                    </div>
+                  );
+                } else if (netAdvantage > 0) {
+                  // B genera más beneficio neto aunque su TCO sea mayor (por mayor volumen)
+                  return (
+                    <div className="mt-3 rounded-xl p-4 flex gap-3 border" style={{ backgroundColor: C.sky[50], borderColor: C.sky[200] }}>
+                      <CheckCircle style={{ color: C.sky[600] }} className="flex-shrink-0 mt-0.5" size={18} />
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        {tcoSaving < 0
+                          ? <><strong>Contexto:</strong> {shortNameB} tiene un TCO {fc(Math.abs(tcoSaving))}/mes superior a {shortNameA} (principalmente por amortización de una máquina de mayor valor). Sin embargo, al producir un <strong>{((data.growthRate || 0) * 100).toFixed(0)}% más</strong> de m², genera {fc((results.monthlyRevenueB || 0) - results.monthlyRevenue)}/mes adicionales en ventas. Resultado: <strong style={{ color: C.sky[600] }}>{shortNameB} genera {fc(netAdvantage)}/mes más de beneficio neto</strong> que {shortNameA}.</>
+                          : <><strong>{shortNameB} genera {fc(netAdvantage)}/mes más de beneficio neto</strong> que la máquina actual.</>
+                        }
+                      </p>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div className="mt-3 rounded-xl p-4 flex gap-3 border" style={{ backgroundColor: C.amber[50], borderColor: C.amber[200] }}>
+                      <AlertTriangle style={{ color: C.amber[600] }} className="flex-shrink-0 mt-0.5" size={18} />
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        <strong>Con el volumen actual</strong>, {shortNameB} no mejora el beneficio neto de {shortNameA}.
+                        La diferencia de {fc(Math.abs(netAdvantage))}/mes se compensaría con mayor capacidad productiva
+                        (secado instantáneo, trabajos adicionales) y acceso a nuevos mercados certificados.
+                      </p>
+                    </div>
+                  );
+                }
+              })()}
+            </div>
+          );
+        })()}
 
         {/* ── SECCIÓN 5: PROYECCIÓN 5 AÑOS ── */}
         {results.yearlyData && results.yearlyData.length > 0 && (

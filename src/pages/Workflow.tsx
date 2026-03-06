@@ -4,7 +4,7 @@ import { Clock, Zap, Package, ArrowRight, CheckCircle2, XCircle, Layers, Trendin
 import { useData, ALL_MACHINES } from '../context/DataContext';
 
 // Modelos que son mesas planas (UV flatbed) — no rollo a rollo
-const FLATBED_KEYWORDS = ['JFX', 'LEJ', 'Kudu', 'Nyala', 'Topi', 'Impala', 'Oryx', 'Anapurna', 'Jeti Tauro'];
+const FLATBED_KEYWORDS = ['JFX', 'LEJ', 'UJ-330H', 'Kudu', 'Nyala', 'Topi', 'Impala', 'Oryx', 'Anapurna', 'Jeti Tauro', 'Arizona', 'V7000', 'CO-640', 'XpertJet 14'];
 const isFlatbed = (model: string) => FLATBED_KEYWORDS.some(k => model.includes(k));
 const isR530model = (model: string) => model.includes('R530');
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useData, ALL_MACHINES, Machine, groupedMachines, SECTORS, GROWTH_SCENARIOS } from '../context/DataContext';
+import { useData, ALL_MACHINES, Machine, groupedMachines, getMachineSegment, SECTORS, GROWTH_SCENARIOS } from '../context/DataContext';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   GitCompare, RefreshCw, ChevronDown, Info, ArrowRight,
@@ -39,6 +39,14 @@ interface MachineColumnProps {
   onParamChange: (key: string, val: number) => void;
 }
 
+type SegmentFilter = 'all' | 'flexible' | 'rigid';
+
+const SEGMENT_TABS: { key: SegmentFilter; label: string }[] = [
+  { key: 'all',      label: 'Todos' },
+  { key: 'flexible', label: 'Rollo' },
+  { key: 'rigid',    label: 'Rígidos / Híbridos' },
+];
+
 const MachineColumn: React.FC<MachineColumnProps> = ({
   label, accent, accentLabel, selectedModel, onModelChange,
   speed, inkPricePerLiter, inkMlPerM2, inkCostPerM2,
@@ -46,7 +54,22 @@ const MachineColumn: React.FC<MachineColumnProps> = ({
   onParamChange,
 }) => {
   const [showInfo, setShowInfo] = useState(false);
+  const [segFilter, setSegFilter] = useState<SegmentFilter>('all');
   const selectedMachine: Machine | undefined = ALL_MACHINES.find(m => m.model === selectedModel);
+
+  const filteredGrouped = Object.fromEntries(
+    Object.entries(groupedMachines)
+      .map(([b, ms]) => [
+        b,
+        segFilter === 'all'
+          ? ms
+          : ms.filter(m => {
+              const seg = getMachineSegment(m);
+              return segFilter === 'rigid' ? seg === 'rigid' || seg === 'hybrid' : seg === 'flexible';
+            }),
+      ])
+      .filter(([, ms]) => (ms as Machine[]).length > 0),
+  ) as Record<string, Machine[]>;
   const brand = selectedMachine?.brand ?? 'Roland';
   const bs = brandColors[brand] ?? brandColors.Roland;
   const isLatex = selectedMachine?.technology === 'latex';
@@ -85,13 +108,30 @@ const MachineColumn: React.FC<MachineColumnProps> = ({
         <div>
           <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Modelo</label>
 
+          {/* Tabs de segmento */}
+          <div className="flex gap-1 mb-2">
+            {SEGMENT_TABS.map(tab => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setSegFilter(tab.key)}
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${segFilter === tab.key
+                  ? 'bg-gray-700 text-white border-transparent'
+                  : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           {/* Pills de marca */}
           <div className="flex flex-wrap gap-1.5 mb-3">
-            {Object.keys(groupedMachines).map(b => (
+            {Object.keys(filteredGrouped).map(b => (
               <button
                 key={b}
                 type="button"
-                onClick={() => onModelChange(groupedMachines[b][0].model)}
+                onClick={() => onModelChange(filteredGrouped[b][0].model)}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all border ${brand === b
                   ? (brandColors[b]?.badge ?? 'bg-gray-700 text-white') + ' border-transparent shadow-sm'
                   : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
@@ -109,7 +149,7 @@ const MachineColumn: React.FC<MachineColumnProps> = ({
               onChange={e => onModelChange(e.target.value)}
               className={`w-full px-4 py-3 pr-10 ${bs.bg} ${bs.text} font-semibold text-sm focus:outline-none appearance-none cursor-pointer`}
             >
-              {Object.entries(groupedMachines).map(([b, machines]) => (
+              {Object.entries(filteredGrouped).map(([b, machines]) => (
                 <optgroup key={b} label={`── ${b} ──`}>
                   {machines.map(m => (
                     <option key={m.model} value={m.model}>{m.model}</option>

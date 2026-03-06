@@ -356,6 +356,18 @@ export const ALL_MACHINES: Machine[] = [
 
   // ── Mimaki mesas planas UV (flatbeds) ─────────────────────────────────────
   // Tinta LUS-120 / LUS-150 / LUS-200 flexible UV. GREENGUARD Gold certificada.
+  // UJ-330H-160 — híbrido rollo+rígido 1620mm, cinta de arrastre + vacío, hasta 22 m²/h (CMYK) / 14 m²/h (con blanco)
+  // Rival directo HP R530. Lanzamiento abril 2026 (FESPA Barcelona).
+  // Tinta ELS-170 UV (SVHC-free, CMR-free). Piezo. Espesor hasta 50.8mm. Energy Star.
+  // Precio estimado ~48.000€ (sin datos PVR oficiales, nueva máquina). Ink ~140€/L.
+  {
+    brand: 'Mimaki', model: 'UJ-330H-160', technology: 'uv',
+    printWidthMm: 1620, printSpeed: 18,
+    inkPricePerLiter: 140, inkMlPerM2: 8, inkCostPerM2: ink(140, 8),
+    weeklyMaintenance: 2.0, dryTimeHours: 0,
+    referencePrice: 48000, lifetimeYears: 8, residualValue: 5000, headCostAnnual: 1500,
+    certifications: ['Energy Star'],
+  },
   // JFX200-2513 EX — plano 2500×1300mm (4'×8'), hasta 35 m²/h, 3 cabezales escalón
   // LUS-120/150 flexible, 2.5D Texture Maker, MSRP ~70.000€. Espesor hasta 50mm.
   {
@@ -554,6 +566,68 @@ export const ALL_MACHINES: Machine[] = [
     referencePrice: 350000, lifetimeYears: 12, residualValue: 45000, headCostAnnual: 3000,
     certifications: [],
   },
+
+  // ── FLATBED RÍGIDOS / HÍBRIDOS ───────────────────────────────────────────────
+
+  // Canon Arizona 135 GT — flatbed UV-LED, 1270mm rollo / 1320×2500mm plano
+  // Hasta 34,2 m²/h (máx.), ~25 m²/h en producción. GREENGUARD Gold.
+  // Precio estimado ~68.000€. Ink ~120€/L.
+  {
+    brand: 'Canon', model: 'Arizona 135 GT', technology: 'uv',
+    printWidthMm: 1270, printSpeed: 25,
+    inkPricePerLiter: 120, inkMlPerM2: 10, inkCostPerM2: ink(120, 10),
+    weeklyMaintenance: 1.5, dryTimeHours: 0,
+    referencePrice: 68000, lifetimeYears: 10, residualValue: 7000, headCostAnnual: 2000,
+    certifications: ['GREENGUARD Gold'],
+  },
+
+  // Epson SureColor V7000 — flatbed UV 4'×8' (1220×2440mm), MicroPiezo
+  // 10 colores UltraChrome UV, ~20 m²/h. GREENGUARD Gold.
+  // Precio estimado ~75.000€. Ink ~130€/L.
+  {
+    brand: 'Epson', model: 'SureColor V7000', technology: 'uv',
+    printWidthMm: 1220, printSpeed: 20,
+    inkPricePerLiter: 130, inkMlPerM2: 9, inkCostPerM2: ink(130, 9),
+    weeklyMaintenance: 1.5, dryTimeHours: 0,
+    referencePrice: 75000, lifetimeYears: 10, residualValue: 8000, headCostAnnual: 1800,
+    certifications: ['GREENGUARD Gold'],
+  },
+
+  // Roland VersaOBJECT CO-640i — flatbed UV 64"×98" (1625×2489mm)
+  // ECO-UV5 inks (CMR-free), ~8 m²/h. GREENGUARD Gold.
+  // Precio estimado ~55.000€. Ink ~110€/L.
+  {
+    brand: 'Roland', model: 'VersaOBJECT CO-640i', technology: 'uv',
+    printWidthMm: 1625, printSpeed: 8,
+    inkPricePerLiter: 110, inkMlPerM2: 12, inkCostPerM2: ink(110, 12),
+    weeklyMaintenance: 1.0, dryTimeHours: 0,
+    referencePrice: 55000, lifetimeYears: 10, residualValue: 5500, headCostAnnual: 1500,
+    certifications: ['GREENGUARD Gold'],
+  },
+
+  // Agfa Jeti Tauro H2500 LED — híbrido UV flatbed 2540mm (rollo+plano)
+  // Hasta 390 m²/h (máx. 8 cabezales), ~240 m²/h en producción. GREENGUARD Gold.
+  // Precio estimado ~290.000€. Ink ~100€/L.
+  {
+    brand: 'Agfa', model: 'Jeti Tauro H2500 LED', technology: 'uv',
+    printWidthMm: 2540, printSpeed: 240,
+    inkPricePerLiter: 100, inkMlPerM2: 8, inkCostPerM2: ink(100, 8),
+    weeklyMaintenance: 3.0, dryTimeHours: 0,
+    referencePrice: 290000, lifetimeYears: 12, residualValue: 35000, headCostAnnual: 4000,
+    certifications: ['GREENGUARD Gold'],
+  },
+
+  // Mutoh XpertJet 1462UF — flatbed UV A1+ (1420×700mm)
+  // US61 inks (CMR-free / SVHC-free), ~12 m²/h. Piezo DX7.
+  // Precio estimado ~28.000€. Ink ~120€/L.
+  {
+    brand: 'Mutoh', model: 'XpertJet 1462UF', technology: 'uv',
+    printWidthMm: 1420, printSpeed: 12,
+    inkPricePerLiter: 120, inkMlPerM2: 10, inkCostPerM2: ink(120, 10),
+    weeklyMaintenance: 1.0, dryTimeHours: 0,
+    referencePrice: 28000, lifetimeYears: 8, residualValue: 2500, headCostAnnual: 1200,
+    certifications: [],
+  },
 ];
 
 export const groupedMachines = ALL_MACHINES.reduce<Record<string, Machine[]>>((acc, m) => {
@@ -561,6 +635,28 @@ export const groupedMachines = ALL_MACHINES.reduce<Record<string, Machine[]>>((a
   acc[m.brand].push(m);
   return acc;
 }, {});
+
+// ─── Segmentación de máquinas ─────────────────────────────────────────────────
+// Determina si una máquina es de rollo (flexible), plano puro (rigid) o híbrida
+// (cinta transportadora + plano, p.ej. HP R530, Mimaki UJ-330H, Agfa Jeti Tauro).
+const RIGID_KEYWORDS = [
+  'Arizona', 'V7000', 'CO-640', 'XpertJet 14', 'Jeti Tauro',
+  'Kudu', 'Nyala', 'Topi', 'Impala', 'Oryx',
+  'JFX', 'LEJ',
+];
+const HYBRID_KEYWORDS = ['R530', 'UJ-330H', 'Karibu'];
+
+export function getMachineSegment(m: Machine): 'flexible' | 'rigid' | 'hybrid' {
+  const key = `${m.brand} ${m.model}`;
+  if (HYBRID_KEYWORDS.some(k => key.includes(k))) return 'hybrid';
+  if (RIGID_KEYWORDS.some(k => key.includes(k))) return 'rigid';
+  return 'flexible';
+}
+
+export const groupedBySegment = ALL_MACHINES.reduce<Record<'flexible' | 'rigid' | 'hybrid', Machine[]>>(
+  (acc, m) => { acc[getMachineSegment(m)].push(m); return acc; },
+  { flexible: [], rigid: [], hybrid: [] },
+);
 
 // ─── Sectores ─────────────────────────────────────────────────────────────────
 export const SECTORS = [
